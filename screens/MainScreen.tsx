@@ -1,5 +1,5 @@
 // CECI EST L'ECRAN D'ACCUEIL
-
+console.log('MainScreen')
 // src/screens/HomeScreen.js
 import React from 'react';
 import { View, FlatList, StyleSheet, SafeAreaView } from 'react-native';
