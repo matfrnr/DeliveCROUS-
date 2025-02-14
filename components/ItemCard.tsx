@@ -1,14 +1,13 @@
 // src/components/ItemCard.js
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
-const ItemCard = ({ item }) => {
+const ItemCard = ({ item, onAddToCart }) => {
   return (
     <View style={styles.card}>
       <Image 
         source={{ uri: item.image }} 
         style={styles.image}
-        // Fallback pour les images qui ne chargent pas
         defaultSource={require('../assets/images/favicon.png')} 
       />
       <View style={styles.content}>
@@ -16,7 +15,15 @@ const ItemCard = ({ item }) => {
         <Text style={styles.description} numberOfLines={2}>
           {item.description}
         </Text>
-        <Text style={styles.price}>{item.prix.toFixed(2)} €</Text>
+        <View style={styles.footer}>
+          <Text style={styles.price}>{item.prix.toFixed(2)} €</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => onAddToCart(item)}
+          >
+            <Text style={styles.addButtonText}>Ajouter au panier</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -52,10 +59,27 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 12,
   },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
   price: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#2ecc71',
+  },
+  addButton: {
+    backgroundColor: '#2ecc71',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  addButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });
 
