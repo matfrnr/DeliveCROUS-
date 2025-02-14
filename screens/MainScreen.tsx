@@ -1,7 +1,10 @@
 // src/screens/HomeScreen.js
 import React from 'react';
-import { View, FlatList, StyleSheet, SafeAreaView, Alert } from 'react-native';
+import { View, FlatList, StyleSheet, SafeAreaView, Alert, Text, Image } from 'react-native';
 import ItemCard from '../components/ItemCard';
+import Panier from '../assets/images/paniers.png'; // Importez l'image locale
+import Compte from '../assets/images/utilisateur.png'; // Importez l'image locale
+import Favoris from '../assets/images/favori.png'; // Importez l'image locale
 
 // Données mockées pour l'affichage
 const MOCK_ITEMS = [
@@ -85,16 +88,34 @@ const HomeScreen = () => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.safeContainer}>
+            {/* SafeAreaView pour la navbar */}
+            <SafeAreaView style={styles.navbarContainer}>
+            <View style={styles.navbar}>
+                    <Text style={styles.title}>DeliveCrous</Text>
+                    <View style={styles.navbarImages}>
+                        <Image
+                            source={Favoris} // Utilisez l'image locale importée
+                            style={styles.navbarImage}
+                        />
+                        <Image
+                            source={Compte} // Utilisez l'image locale importée
+                            style={styles.navbarImage}
+                        />
+                        <Image
+                            source={Panier} // Utilisez l'image locale importée
+                            style={styles.navbarImage}
+                        />
+                    </View>
+                </View>
+            </SafeAreaView>
+
             <FlatList
                 data={MOCK_ITEMS}
                 renderItem={({ item }) => (
-                    <ItemCard
-                        item={item}
-                        onAddToCart={handleAddToCart}
-                    />
+                    <ItemCard item={item} onAddToCart={handleAddToCart} />
                 )}
-                keyExtractor={item => item.id}
+                keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.list}
             />
         </SafeAreaView>
@@ -102,13 +123,44 @@ const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: {
+    safeContainer: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+    },
+    navbarContainer: {
+        backgroundColor: '#fff',
+    },
+    navbar: {
+        height: 60,
+        backgroundColor: '#fff',
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        display: 'flex',
+        flexDirection: 'row',
+        paddingHorizontal: 15,
+        marginTop: 30,
+    },
+    navbarImages: {
+        flexDirection: 'row',
+    },
+    navbarImage: {
+        width: 25,
+        height: 25,
+        marginRight: 10, // Espace entre l'image et le texte
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
     },
     list: {
         paddingVertical: 16,
     },
 });
+
 
 export default HomeScreen;
