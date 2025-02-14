@@ -1,8 +1,10 @@
-// src/components/ItemCard.js
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const ItemCard = ({ item, onAddToCart }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+
   return (
     <View style={styles.card}>
       <Image 
@@ -11,7 +13,16 @@ const ItemCard = ({ item, onAddToCart }) => {
         defaultSource={require('../assets/images/favicon.png')} 
       />
       <View style={styles.content}>
-        <Text style={styles.title}>{item.nom}</Text>
+        <View style={styles.header}>
+          <Text style={styles.title}>{item.nom}</Text>
+          <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
+            <Icon 
+              name={isFavorite ? 'heart' : 'heart-outline'} 
+              size={24} 
+              color={isFavorite ? 'red' : 'gray'} 
+            />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.description} numberOfLines={2}>
           {item.description}
         </Text>
@@ -49,10 +60,15 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   title: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 8,
   },
   description: {
     fontSize: 14,
