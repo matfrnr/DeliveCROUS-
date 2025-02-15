@@ -1,42 +1,71 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useRouter } from 'expo-router';
 
 const ItemCard = ({ item, onAddToCart }) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const router = useRouter();
+
+  const handleCardPress = () => {
+    router.push({
+      pathname: '/item-detail',
+      params: {
+        id: item.id,
+        nom: item.nom,
+        description: item.description,
+        prix: item.prix.toString(),
+        image: item.image,
+        allergenes: item.allergenes,
+        categorie : item.categorie,
+        calories : item.calories,
+        origine : item.origine
+      }
+    });
+  };
 
   return (
-    <View style={styles.card}>
-      <Image 
-        source={{ uri: item.image }} 
-        style={styles.image}
-        defaultSource={require('../assets/images/favicon.png')} 
-      />
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>{item.nom}</Text>
-          <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)}>
-            <Icon 
-              name={isFavorite ? 'heart' : 'heart-outline'} 
-              size={24} 
-              color={isFavorite ? 'red' : 'gray'} 
-            />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.description} numberOfLines={2}>
-          {item.description}
-        </Text>
-        <View style={styles.footer}>
-          <Text style={styles.price}>{item.prix.toFixed(2)} €</Text>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => onAddToCart(item)}
-          >
-            <Text style={styles.addButtonText}>Ajouter au panier</Text>
-          </TouchableOpacity>
+    <TouchableOpacity onPress={handleCardPress} activeOpacity={0.9}>
+      <View style={styles.card}>
+        <Image
+          source={{ uri: item.image }}
+          style={styles.image}
+          defaultSource={require('../assets/images/favicon.png')}
+        />
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title}>{item.nom}</Text>
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation(); // Empêche la navigation
+                setIsFavorite(!isFavorite);
+              }}
+            >
+              <Icon
+                name={isFavorite ? 'heart' : 'heart-outline'}
+                size={24}
+                color={isFavorite ? 'red' : 'gray'}
+              />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.description} numberOfLines={2}>
+            {item.description}
+          </Text>
+          <View style={styles.footer}>
+            <Text style={styles.price}>{item.prix.toFixed(2)} €</Text>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={(e) => {
+                e.stopPropagation(); // Empêche la navigation
+                onAddToCart(item);
+              }}
+            >
+              <Text style={styles.addButtonText}>Ajouter au panier</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

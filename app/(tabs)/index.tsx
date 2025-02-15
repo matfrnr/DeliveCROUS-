@@ -7,5 +7,5 @@ import { ThemedView } from '@/components/ThemedView';
 import MainScreen from '../../screens/MainScreen';
 import SucessScreen from '../../screens/SucessScreen';
 export default function HomeScreen() {
-  return <SucessScreen />;
+  return <MainScreen />;
 }
