@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
         marginRight: 10, // Espace entre l'image et le texte
     },
     title: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
         color: '#333',
     },
