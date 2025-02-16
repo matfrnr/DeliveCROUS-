@@ -1,10 +1,11 @@
 // src/screens/HomeScreen.js
 import React from 'react';
-import { View, FlatList, StyleSheet, SafeAreaView, Alert, Text, Image } from 'react-native';
+import { View, FlatList, StyleSheet, SafeAreaView, Alert, Text, Image, TouchableOpacity } from 'react-native';
 import ItemCard from '../components/ItemCard';
 import Panier from '../assets/images/paniers.png'; // Importez l'image locale
 import Compte from '../assets/images/utilisateur.png'; // Importez l'image locale
 import Favoris from '../assets/images/favori.png'; // Importez l'image locale
+import { router } from 'expo-router';
 
 // Données mockées pour l'affichage
 const MOCK_ITEMS = [
@@ -134,18 +135,11 @@ const HomeScreen = () => {
                 <View style={styles.navbar}>
                     <Text style={styles.title}>DeliveCrous</Text>
                     <View style={styles.navbarImages}>
-                        <Image
-                            source={Favoris} // Utilisez l'image locale importée
-                            style={styles.navbarImage}
-                        />
-                        <Image
-                            source={Compte} // Utilisez l'image locale importée
-                            style={styles.navbarImage}
-                        />
-                        <Image
-                            source={Panier} // Utilisez l'image locale importée
-                            style={styles.navbarImage}
-                        />
+                        <Image source={Favoris} style={styles.navbarImage} />
+                        <Image source={Compte} style={styles.navbarImage} />
+                        <TouchableOpacity onPress={() => router.push('/cart')}>
+                            <Image source={Panier} style={styles.navbarImage} />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </SafeAreaView>

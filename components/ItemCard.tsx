@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
+import { useCart } from '@/context/CartContext';
 
 const ItemCard = ({ item, onAddToCart }) => {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -17,11 +18,18 @@ const ItemCard = ({ item, onAddToCart }) => {
         prix: item.prix.toString(),
         image: item.image,
         allergenes: item.allergenes,
-        categorie : item.categorie,
-        calories : item.calories,
-        origine : item.origine
+        categorie: item.categorie,
+        calories: item.calories,
+        origine: item.origine
       }
     });
+  };
+
+  const { addToCart } = useCart();
+
+  const handleAddToCart = () => {
+    addToCart(item);
+    Alert.alert("Ajouté au panier", `${item.nom} a été ajouté à votre panier`);
   };
 
   return (
@@ -55,10 +63,7 @@ const ItemCard = ({ item, onAddToCart }) => {
             <Text style={styles.price}>{item.prix.toFixed(2)} €</Text>
             <TouchableOpacity
               style={styles.addButton}
-              onPress={(e) => {
-                e.stopPropagation(); // Empêche la navigation
-                onAddToCart(item);
-              }}
+              onPress={handleAddToCart}
             >
               <Text style={styles.addButtonText}>Ajouter au panier</Text>
             </TouchableOpacity>
