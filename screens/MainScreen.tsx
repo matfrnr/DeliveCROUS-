@@ -165,17 +165,16 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
     safeContainer: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fff',
     },
     navbarContainer: {
         backgroundColor: '#fff',
     },
     navbar: {
         height: 60,
-        backgroundColor: '#fff',
+        backgroundColor: 'rgb(250,250,250)',
         elevation: 3,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         justifyContent: 'space-between',
         alignItems: 'center',

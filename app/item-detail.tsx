@@ -4,6 +4,7 @@ import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollVi
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useCart } from '../context/CartContext';
 
 // Importez les mêmes images que dans HomeScreen
 import Panier from '../assets/images/paniers.png';
@@ -15,6 +16,8 @@ const ItemDetailScreen = () => {
     // Récupération des paramètres de l'URL
     const params = useLocalSearchParams();
     const [isFavorite, setIsFavorite] = useState(false);
+    const { cartItems } = useCart();
+    const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
 
     // Reconstruction de l'objet item à partir des paramètres
     const item = {
@@ -29,8 +32,10 @@ const ItemDetailScreen = () => {
         origine: params.origine
     };
 
+    const { addToCart } = useCart();
+
     const handleAddToCart = () => {
-        // Logique pour ajouter au panier
+        addToCart(item);
         Alert.alert("Ajouté au panier", `${item.nom} a été ajouté à votre panier`);
     };
 
@@ -43,7 +48,9 @@ const ItemDetailScreen = () => {
                     <View style={styles.navbarImages}>
                         <Image source={Favoris} style={styles.navbarImage} />
                         <Image source={Compte} style={styles.navbarImage} />
-                        <Image source={Panier} style={styles.navbarImage} />
+                        <TouchableOpacity onPress={() => router.push('/cart')}>
+                            <Image source={Panier} style={styles.navbarImage} />
+                        </TouchableOpacity>
                     </View>
                 </View>
             </SafeAreaView>
@@ -118,7 +125,7 @@ const ItemDetailScreen = () => {
 const styles = StyleSheet.create({
     safeContainer: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#fff',
     },
     allergenesAndCaloriesContainer: {
         flexDirection: 'row',
@@ -144,6 +151,25 @@ const styles = StyleSheet.create({
         color: '#000',
         marginBottom: 4,
     },
+    cartIconContainer: {
+        position: 'relative',
+    },
+    cartBadge: {
+        position: 'absolute',
+        right: 5,
+        top: -5,
+        backgroundColor: 'red',
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cartBadgeText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
     itemAllergene: {
         fontSize: 16,
         color: '#000',
@@ -159,7 +185,7 @@ const styles = StyleSheet.create({
     },
     navbar: {
         height: 60,
-        backgroundColor: '#fff',
+        backgroundColor: 'rgb(250,250,250)',
         elevation: 3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
