@@ -55,7 +55,7 @@ const ItemCard = ({ item }) => {
             <TouchableOpacity onPress={handleFavoriteToggle}>
               <Icon
                 name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
-                size={24}
+                size={30}
                 color={isFavorite(item.id) ? 'red' : 'gray'}
               />
             </TouchableOpacity>

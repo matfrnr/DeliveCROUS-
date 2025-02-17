@@ -101,7 +101,7 @@ const ItemDetailScreen = () => {
                         >
                             <Icon
                                 name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
-                                size={24}
+                                size={30}
                                 color={isFavorite(item.id) ? 'red' : 'gray'}
                             />
                         </TouchableOpacity>

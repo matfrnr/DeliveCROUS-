@@ -43,9 +43,11 @@ const CartScreen = () => {
             {/* Navbar */}
             <SafeAreaView style={styles.navbarContainer}>
                 <View style={styles.navbar}>
-                    <Text style={styles.title}>DeliveCrous</Text>
+                    <TouchableOpacity onPress={() => router.push('/')}>
+                        <Text style={styles.title}>DeliveCrous</Text>
+                    </TouchableOpacity>
                     <View style={styles.navbarImages}>
-                        <TouchableOpacity onPress={() => router.push('/favorites')}>
+                        <TouchableOpacity onPress={() => router.replace('/favorites')}>
                             <Image source={Favoris} style={styles.navbarImage} />
                         </TouchableOpacity>
                         <TouchableOpacity>

@@ -49,7 +49,7 @@ const FavoritesScreen = () => {
                 style={styles.favoriteButton}
                 onPress={() => handleRemoveFromFavorites(item.id)}
             >
-                <Icon name="heart" size={24} color="red" />
+                <Icon name="heart" size={30} color="red" />
             </TouchableOpacity>
         </TouchableOpacity>
     );
@@ -68,7 +68,7 @@ const FavoritesScreen = () => {
                     <TouchableOpacity>
                         <Image source={Compte} style={styles.navbarImage} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => router.push('/cart')}>
+                    <TouchableOpacity onPress={() => router.replace('/cart')}>
                         <View style={styles.cartIconContainer}>
                             <Image source={Panier} style={styles.navbarImage} />
                             {totalItemsInCart > 0 && (
