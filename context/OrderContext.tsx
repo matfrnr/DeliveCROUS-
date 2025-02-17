@@ -1,19 +1,63 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OrderContext = createContext();
 
 export const OrderProvider = ({ children }) => {
     const [orders, setOrders] = useState([]);
 
+    // Charger les commandes depuis AsyncStorage au démarrage
     useEffect(() => {
-        // Simuler la fin de la commande après 10 minutes
+        const loadOrders = async () => {
+            try {
+                const savedOrders = await AsyncStorage.getItem('orders');
+                if (savedOrders) {
+                    const parsedOrders = JSON.parse(savedOrders);
+                    const updatedOrders = parsedOrders.map(order => {
+                        const now = Math.floor(Date.now() / 1000); // Timestamp actuel en secondes
+                        const elapsedTime = now - order.startTime;
+                        const newRemainingTime = Math.max(order.remainingTime - elapsedTime, 0);
+                        
+                        return {
+                            ...order,
+                            remainingTime: newRemainingTime,
+                            status: newRemainingTime === 0 ? 'delivered' : order.status
+                        };
+                    });
+
+                    setOrders(updatedOrders);
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des commandes:', error);
+            }
+        };
+
+        loadOrders();
+    }, []);
+
+    // Sauvegarde automatique des commandes
+    useEffect(() => {
+        const saveOrders = async () => {
+            try {
+                await AsyncStorage.setItem('orders', JSON.stringify(orders));
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde des commandes:', error);
+            }
+        };
+
+        if (orders.length > 0) {
+            saveOrders();
+        }
+    }, [orders]);
+
+    // Mettre à jour les temps restants toutes les secondes
+    useEffect(() => {
         const interval = setInterval(() => {
             setOrders((prevOrders) =>
-                prevOrders.map((order) => {
+                prevOrders.map(order => {
                     if (order.remainingTime > 0) {
                         return { ...order, remainingTime: order.remainingTime - 1 };
                     } else {
-                        // Marquer la commande comme livrée
                         return { ...order, status: 'delivered' };
                     }
                 })
@@ -23,18 +67,35 @@ export const OrderProvider = ({ children }) => {
         return () => clearInterval(interval);
     }, []);
 
-    const addOrder = (orderItems) => {
+    const addOrder = async (orderItems) => {
+        const now = Math.floor(Date.now() / 1000); // Timestamp actuel en secondes
         const newOrder = {
             id: Date.now(),
             items: orderItems,
-            remainingTime: 180, // 10 minutes in seconds
-            status: 'in-progress'
+            startTime: now, // On stocke l'heure de début
+            remainingTime: 180, // 3 minutes
+            status: 'in-progress',
         };
-        setOrders([...orders, newOrder]);
+
+        const updatedOrders = [...orders, newOrder];
+        setOrders(updatedOrders);
+
+        try {
+            await AsyncStorage.setItem('orders', JSON.stringify(updatedOrders));
+        } catch (error) {
+            console.error('Erreur lors de l’ajout de la commande:', error);
+        }
     };
 
-    const removeOrder = (orderId) => {
-        setOrders(orders.filter(order => order.id !== orderId));
+    const removeOrder = async (orderId) => {
+        const updatedOrders = orders.filter(order => order.id !== orderId);
+        setOrders(updatedOrders);
+
+        try {
+            await AsyncStorage.setItem('orders', JSON.stringify(updatedOrders));
+        } catch (error) {
+            console.error('Erreur lors de la suppression de la commande:', error);
+        }
     };
 
     return (

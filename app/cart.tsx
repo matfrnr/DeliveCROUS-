@@ -237,7 +237,7 @@ const CartScreen = () => {
                         if (processOrder(total)) {
                             addOrder([...cartItems]);
                             setShowDeliveryForm(false);
-                            router.push('/sucess-screen');
+                            router.push('/success-screen');
                         }
                     }
                 }
@@ -669,7 +669,8 @@ const styles = StyleSheet.create({
         paddingBottom: 20,
     },
     ordersButton: {
-        backgroundColor: '#2ecc71',
+        backgroundColor: '#3498db',
+        opacity: 0.8,
         paddingVertical: 12,
         paddingHorizontal: 20,
         borderRadius: 8,
