@@ -134,7 +134,7 @@ const CartScreen = () => {
         balance,        // Ajout de balance
         processOrder    // Ajout de processOrder
     } = useCart();
-
+    const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
     const [showDeliveryForm, setShowDeliveryForm] = useState(false);
     const [deliveryInfo, setDeliveryInfo] = useState({
         firstName: '',
@@ -210,7 +210,14 @@ const CartScreen = () => {
                             <Image source={Compte} style={styles.navbarImage} />
                         </TouchableOpacity>
                         <TouchableOpacity>
-                            <Image source={Panier} style={[styles.navbarImage, { tintColor: '#2ecc71' }]} />
+                            <View style={styles.cartIconContainer}>
+                                <Image source={Panier} style={[styles.navbarImage, { tintColor: '#2ecc71' }]} />
+                                {totalItemsInCart > 0 && (
+                                    <View style={styles.cartBadge}>
+                                        <Text style={styles.cartBadgeText}>{totalItemsInCart}</Text>
+                                    </View>
+                                )}
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -329,6 +336,26 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: '#333',
+    },
+    cartIconContainer: {
+        position: 'relative',
+    },
+    cartBadge: {
+        position: 'absolute',
+        right: -5,
+        top: -5,
+        backgroundColor: 'red',
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    cartBadgeText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     backButton: {
         position: 'absolute',
