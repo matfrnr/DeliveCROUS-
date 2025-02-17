@@ -1,15 +1,14 @@
-// app/cart.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Alert, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCart } from '../context/CartContext';
+import { useOrder } from '../context/OrderContext'; // Importer le contexte de commande
 
 // Importez les mêmes images que dans HomeScreen
 import Panier from '../assets/images/paniers.png';
 import Compte from '../assets/images/utilisateur.png';
 import Favoris from '../assets/images/favori.png';
-
 
 const DeliveryFormModal = ({
     visible,
@@ -124,6 +123,55 @@ const DeliveryFormModal = ({
     </Modal>
 );
 
+const OrderTrackingCard = ({ order, formatTime }) => (
+    <View style={styles.orderTrackingCard}>
+        <Text style={styles.orderTrackingTitle}>Commande {order.status === 'delivered' ? 'livrée' : 'en cours'}</Text>
+        {order.status === 'in-progress' && (
+            <>
+                <Text style={styles.orderTrackingStatus}>En cours de préparation</Text>
+                <Text style={styles.orderTrackingETA}>Arrivée estimée dans {formatTime(order.remainingTime)}</Text>
+            </>
+        )}
+        <View style={styles.orderItemsContainer}>
+            {order.items.map((item) => (
+                <View key={item.id} style={styles.orderItem}>
+                    <Text style={styles.orderItemName}>{item.nom}</Text>
+                    <Text style={styles.orderItemQuantity}>x{item.quantity}</Text>
+                </View>
+            ))}
+        </View>
+    </View>
+);
+
+const OrdersPopup = ({ visible, onClose, orders, formatTime }) => (
+    <Modal
+        visible={visible}
+        animationType="slide"
+        transparent={true}
+    >
+        <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Commandes</Text>
+                {orders.length > 0 ? (
+                    <ScrollView style={styles.ordersContainer}>
+                        {orders.map((order) => (
+                            <OrderTrackingCard key={order.id} order={order} formatTime={formatTime} />
+                        ))}
+                    </ScrollView>
+                ) : (
+                    <Text style={styles.noOrdersText}>Aucune commande</Text>
+                )}
+                <TouchableOpacity
+                    style={[styles.modalButtonCommande, styles.cancelButton]}
+                    onPress={onClose}
+                >
+                    <Text style={styles.cancelButtonText}>Fermer</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    </Modal>
+);
+
 const CartScreen = () => {
     const router = useRouter();
     const {
@@ -131,11 +179,13 @@ const CartScreen = () => {
         removeFromCart,
         updateQuantity,
         getCartTotal,
-        balance,        // Ajout de balance
-        processOrder    // Ajout de processOrder
+        balance,
+        processOrder
     } = useCart();
+    const { orders, addOrder } = useOrder();
     const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
     const [showDeliveryForm, setShowDeliveryForm] = useState(false);
+    const [showOrdersPopup, setShowOrdersPopup] = useState(false);
     const [deliveryInfo, setDeliveryInfo] = useState({
         firstName: '',
         lastName: '',
@@ -157,7 +207,6 @@ const CartScreen = () => {
     };
 
     const handleSubmitDeliveryInfo = () => {
-        // Vérification des champs obligatoires
         if (!deliveryInfo.firstName || !deliveryInfo.lastName || !deliveryInfo.university ||
             !deliveryInfo.phoneNumber || !deliveryInfo.address || !deliveryInfo.postalCode ||
             !deliveryInfo.city) {
@@ -186,6 +235,7 @@ const CartScreen = () => {
                     text: "Confirmer",
                     onPress: () => {
                         if (processOrder(total)) {
+                            addOrder([...cartItems]);
                             setShowDeliveryForm(false);
                             router.push('/sucess-screen');
                         }
@@ -194,6 +244,13 @@ const CartScreen = () => {
             ]
         );
     };
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes} min ${remainingSeconds} s`;
+    };
+
     return (
         <SafeAreaView style={styles.safeContainer}>
             {/* Navbar */}
@@ -290,6 +347,22 @@ const CartScreen = () => {
                     </View>
                 </>
             )}
+
+            {/* Bouton pour afficher les commandes */}
+            <TouchableOpacity
+                style={styles.ordersButton}
+                onPress={() => setShowOrdersPopup(true)}
+            >
+                <Text style={styles.ordersButtonText}>Voir les commandes</Text>
+            </TouchableOpacity>
+
+            <OrdersPopup
+                visible={showOrdersPopup}
+                onClose={() => setShowOrdersPopup(false)}
+                orders={orders}
+                formatTime={formatTime}
+            />
+
             <DeliveryFormModal
                 visible={showDeliveryForm}
                 onClose={() => setShowDeliveryForm(false)}
@@ -297,7 +370,6 @@ const CartScreen = () => {
                 setDeliveryInfo={setDeliveryInfo}
                 onSubmit={handleSubmitDeliveryInfo}
             />
-
         </SafeAreaView>
     );
 };
@@ -492,6 +564,12 @@ const styles = StyleSheet.create({
     formContainer: {
         maxHeight: '80%',
     },
+    noOrdersText: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
     inputLabel: {
         fontSize: 14,
         fontWeight: 'bold',
@@ -521,6 +599,11 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginHorizontal: 5,
     },
+    modalButtonCommande: {
+        padding: 5,
+        borderRadius: 8,
+        marginHorizontal: 80,
+    },
     cancelButton: {
         backgroundColor: '#f8f9fa',
         borderWidth: 1,
@@ -537,6 +620,65 @@ const styles = StyleSheet.create({
     confirmButtonText: {
         color: 'white',
         textAlign: 'center',
+        fontWeight: 'bold',
+    },
+    orderTrackingCard: {
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        padding: 16,
+        margin: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    orderTrackingTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 8,
+    },
+    orderTrackingStatus: {
+        fontSize: 16,
+        color: '#2ecc71',
+        marginBottom: 4,
+    },
+    orderTrackingETA: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 16,
+    },
+    orderItemsContainer: {
+        marginTop: 16,
+    },
+    orderItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    orderItemName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    orderItemQuantity: {
+        fontSize: 16,
+        color: '#666',
+    },
+    ordersContainer: {
+        marginTop: 16,
+        paddingBottom: 20,
+    },
+    ordersButton: {
+        backgroundColor: '#2ecc71',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    ordersButtonText: {
+        color: '#fff',
+        fontSize: 16,
         fontWeight: 'bold',
     },
 });

@@ -7,10 +7,10 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { CartProvider } from '@/context/CartContext';
 import { FavoritesProvider } from '@/context/FavoritesContext';
-
+import { OrderProvider } from '@/context/OrderContext'; // Importer le contexte de commande
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Empêcher l'écran de splash de se cacher automatiquement avant que le chargement des ressources soit terminé.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -30,20 +30,22 @@ export default function RootLayout() {
   }
 
   return (
-    <CartProvider>
-      <FavoritesProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-            <Stack.Screen name="item-detail" options={{ headerShown: false }} />
-            <Stack.Screen name="cart" options={{ headerShown: false }} />
-            <Stack.Screen name="sucess-screen" options={{ headerShown: false }} />
-            <Stack.Screen name="favorites" options={{ headerShown: false }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </FavoritesProvider>
-    </CartProvider>
+    <OrderProvider>
+      <CartProvider>
+        <FavoritesProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+              <Stack.Screen name="item-detail" options={{ headerShown: false }} />
+              <Stack.Screen name="cart" options={{ headerShown: false }} />
+              <Stack.Screen name="success-screen" options={{ headerShown: false }} />
+              <Stack.Screen name="favorites" options={{ headerShown: false }} />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </FavoritesProvider>
+      </CartProvider>
+    </OrderProvider>
   );
 }

@@ -14,7 +14,7 @@ const OrderConfirmationScreen = () => {
                     <Text style={styles.title}>DeliveCrous</Text>
                     <TouchableOpacity
                         style={styles.backButton}
-                        onPress={() => router.push('/')}
+                        onPress={() => router.back()}
                     >
                         <Ionicons name="arrow-back" size={24} color="black" />
                     </TouchableOpacity>
