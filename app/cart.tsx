@@ -45,14 +45,14 @@ const CartScreen = () => {
                 <View style={styles.navbar}>
                     <Text style={styles.title}>DeliveCrous</Text>
                     <View style={styles.navbarImages}>
-                        <TouchableOpacity onPress={() => router.push('/')}>
+                        <TouchableOpacity onPress={() => router.push('/favorites')}>
                             <Image source={Favoris} style={styles.navbarImage} />
                         </TouchableOpacity>
                         <TouchableOpacity>
                             <Image source={Compte} style={styles.navbarImage} />
                         </TouchableOpacity>
                         <TouchableOpacity>
-                            <Image source={Panier} style={styles.navbarImage} />
+                            <Image source={Panier} style={[styles.navbarImage, { tintColor: '#2ecc71' }]} />
                         </TouchableOpacity>
                     </View>
                 </View>

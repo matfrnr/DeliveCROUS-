@@ -6,6 +6,7 @@ import Panier from '../assets/images/paniers.png'; // Importez l'image locale
 import Compte from '../assets/images/utilisateur.png'; // Importez l'image locale
 import Favoris from '../assets/images/favori.png'; // Importez l'image locale
 import { router } from 'expo-router';
+import { useCart } from '@/context/CartContext';
 
 // Données mockées pour l'affichage
 const MOCK_ITEMS = [
@@ -122,6 +123,9 @@ const MOCK_ITEMS = [
 ];
 
 const HomeScreen = () => {
+    const { cartItems, addToCart } = useCart();
+    const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
+
     const handleAddToCart = (item) => {
         // Cette fonction sera implémentée plus tard
         // Pour l'instant, juste une notification de confirmation
@@ -135,10 +139,21 @@ const HomeScreen = () => {
                 <View style={styles.navbar}>
                     <Text style={styles.title}>DeliveCrous</Text>
                     <View style={styles.navbarImages}>
-                        <Image source={Favoris} style={styles.navbarImage} />
-                        <Image source={Compte} style={styles.navbarImage} />
+                        <TouchableOpacity onPress={() => router.push('/favorites')}>
+                            <Image source={Favoris} style={styles.navbarImage} />
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                            <Image source={Compte} style={styles.navbarImage} />
+                        </TouchableOpacity>
                         <TouchableOpacity onPress={() => router.push('/cart')}>
-                            <Image source={Panier} style={styles.navbarImage} />
+                            <View style={styles.cartIconContainer}>
+                                <Image source={Panier} style={styles.navbarImage} />
+                                {totalItemsInCart > 0 && (
+                                    <View style={styles.cartBadge}>
+                                        <Text style={styles.cartBadgeText}>{totalItemsInCart}</Text>
+                                    </View>
+                                )}
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -192,6 +207,25 @@ const styles = StyleSheet.create({
     },
     list: {
         paddingVertical: 16,
+    },
+    cartIconContainer: {
+        position: 'relative',
+    },
+    cartBadge: {
+        position: 'absolute',
+        right: -5,
+        top: -5,
+        backgroundColor: 'red',
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cartBadgeText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
 });
 

@@ -1,11 +1,6 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-// Importez les mêmes images que dans HomeScreen
-import Panier from '../assets/images/paniers.png';
-import Compte from '../assets/images/utilisateur.png';
-import Favoris from '../assets/images/favori.png';
 import { router } from "expo-router";
 
 const OrderConfirmationScreen = ({ navigation }) => {

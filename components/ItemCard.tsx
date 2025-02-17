@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 
-const ItemCard = ({ item, onAddToCart }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
+const ItemCard = ({ item }) => {
   const router = useRouter();
+  const { addToCart } = useCart();
+  const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites();
 
   const handleCardPress = () => {
     router.push({
@@ -25,11 +27,18 @@ const ItemCard = ({ item, onAddToCart }) => {
     });
   };
 
-  const { addToCart } = useCart();
-
   const handleAddToCart = () => {
     addToCart(item);
     Alert.alert("Ajouté au panier", `${item.nom} a été ajouté à votre panier`);
+  };
+
+  const handleFavoriteToggle = (e) => {
+    e.stopPropagation();
+    if (isFavorite(item.id)) {
+      removeFromFavorites(item.id);
+    } else {
+      addToFavorites(item);
+    }
   };
 
   return (
@@ -43,16 +52,11 @@ const ItemCard = ({ item, onAddToCart }) => {
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>{item.nom}</Text>
-            <TouchableOpacity
-              onPress={(e) => {
-                e.stopPropagation(); // Empêche la navigation
-                setIsFavorite(!isFavorite);
-              }}
-            >
+            <TouchableOpacity onPress={handleFavoriteToggle}>
               <Icon
-                name={isFavorite ? 'heart' : 'heart-outline'}
+                name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
                 size={24}
-                color={isFavorite ? 'red' : 'gray'}
+                color={isFavorite(item.id) ? 'red' : 'gray'}
               />
             </TouchableOpacity>
           </View>

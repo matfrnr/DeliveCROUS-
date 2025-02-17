@@ -1,22 +1,22 @@
 // app/item-detail.js
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useCart } from '../context/CartContext';
+import { useFavorites } from '../context/FavoritesContext';
 
-// Importez les mêmes images que dans HomeScreen
-import Panier from '../assets/images/paniers.png';
+// Import des images de la navbar
+import Panier from '../assets/images/paniers.png'; // Importez l'image locale
 import Compte from '../assets/images/utilisateur.png';
 import Favoris from '../assets/images/favori.png';
 
 const ItemDetailScreen = () => {
     const router = useRouter();
-    // Récupération des paramètres de l'URL
     const params = useLocalSearchParams();
-    const [isFavorite, setIsFavorite] = useState(false);
-    const { cartItems } = useCart();
+    const { cartItems, addToCart } = useCart();
+    const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites();
     const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
 
     // Reconstruction de l'objet item à partir des paramètres
@@ -32,11 +32,17 @@ const ItemDetailScreen = () => {
         origine: params.origine
     };
 
-    const { addToCart } = useCart();
-
     const handleAddToCart = () => {
         addToCart(item);
         Alert.alert("Ajouté au panier", `${item.nom} a été ajouté à votre panier`);
+    };
+
+    const handleFavoriteToggle = () => {
+        if (isFavorite(item.id)) {
+            removeFromFavorites(item.id);
+        } else {
+            addToFavorites(item);
+        }
     };
 
     return (
@@ -44,12 +50,25 @@ const ItemDetailScreen = () => {
             {/* Navbar */}
             <SafeAreaView style={styles.navbarContainer}>
                 <View style={styles.navbar}>
-                    <Text style={styles.title}>DeliveCrous</Text>
+                    <TouchableOpacity onPress={() => router.push('/')}>
+                        <Text style={styles.title}>DeliveCrous</Text>
+                    </TouchableOpacity>
                     <View style={styles.navbarImages}>
-                        <Image source={Favoris} style={styles.navbarImage} />
-                        <Image source={Compte} style={styles.navbarImage} />
+                        <TouchableOpacity onPress={() => router.push('/favorites')}>
+                            <Image source={Favoris} style={styles.navbarImage} />
+                        </TouchableOpacity>
+                        <TouchableOpacity>
+                            <Image source={Compte} style={styles.navbarImage} />
+                        </TouchableOpacity>
                         <TouchableOpacity onPress={() => router.push('/cart')}>
-                            <Image source={Panier} style={styles.navbarImage} />
+                            <View style={styles.cartIconContainer}>
+                                <Image source={Panier} style={styles.navbarImage} />
+                                {totalItemsInCart > 0 && (
+                                    <View style={styles.cartBadge}>
+                                        <Text style={styles.cartBadgeText}>{totalItemsInCart}</Text>
+                                    </View>
+                                )}
+                            </View>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -71,25 +90,26 @@ const ItemDetailScreen = () => {
                         <Text style={styles.categoryText}>{item.categorie}</Text>
                     </View>
                 </View>
+
                 {/* Informations du produit */}
                 <View style={styles.detailsContainer}>
                     <View style={styles.nameAndIconContainer}>
                         <Text style={styles.itemName}>{item.nom}</Text>
                         <TouchableOpacity
-                            onPress={(e) => {
-                                e.stopPropagation(); // Empêche la navigation
-                                setIsFavorite(!isFavorite);
-                            }}
+                            onPress={handleFavoriteToggle}
+                            style={styles.favoriteButton}
                         >
                             <Icon
-                                name={isFavorite ? 'heart' : 'heart-outline'}
+                                name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
                                 size={24}
-                                color={isFavorite ? 'red' : 'gray'}
+                                color={isFavorite(item.id) ? 'red' : 'gray'}
                             />
                         </TouchableOpacity>
                     </View>
+
                     <Text style={styles.itemPrice}>{item.prix.toFixed(2)} €</Text>
                     <Text style={styles.itemDescription}>{item.description}</Text>
+
                     <View style={styles.allergenesAndCaloriesContainer}>
                         <View style={styles.allergenesContainer}>
                             <Text style={styles.allergenesTitle}>Allergènes:</Text>
@@ -108,7 +128,9 @@ const ItemDetailScreen = () => {
                             <Text style={styles.itemDescription}>{item.calories}kcal</Text>
                         </View>
                     </View>
+
                     <Text style={styles.itemOrigine}>{item.origine}</Text>
+
                     {/* Bouton ajouter au panier */}
                     <TouchableOpacity
                         style={styles.addToCartButton}
@@ -127,59 +149,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
     },
-    allergenesAndCaloriesContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 12,
-    },
-    allergenesContainer: {
-        flex: 1,
-        marginRight: 8,
-    },
-    itemOrigine: {
-        fontSize: 20,
-        color: '#000',
-        marginBottom: 12,
-    },
-    caloriesContainer: {
-        marginLeft: 8,
-        marginRight: 16,
-    },
-    allergenesTitle: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        color: '#000',
-        marginBottom: 4,
-    },
-    cartIconContainer: {
-        position: 'relative',
-    },
-    cartBadge: {
-        position: 'absolute',
-        right: 5,
-        top: -5,
-        backgroundColor: 'red',
-        borderRadius: 10,
-        width: 20,
-        height: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    cartBadgeText: {
-        color: 'white',
-        fontSize: 12,
-        fontWeight: 'bold',
-    },
-    itemAllergene: {
-        fontSize: 16,
-        color: '#000',
-    },
-    nameAndIconContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
     navbarContainer: {
         backgroundColor: '#fff',
     },
@@ -192,35 +161,37 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         justifyContent: 'space-between',
         alignItems: 'center',
-        display: 'flex',
         flexDirection: 'row',
         paddingHorizontal: 15,
         marginTop: 30,
     },
-    imageContainer: {
-        position: 'relative',
-    },
-    categoryOverlay: {
-        position: 'absolute',
-        top: 20,
-        right: 15,
-        backgroundColor: 'rgb(40, 128, 24)',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 4,
-    },
-    categoryText: {
-        color: '#fff',
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
     navbarImages: {
         flexDirection: 'row',
+        alignItems: 'center',
     },
     navbarImage: {
         width: 25,
         height: 25,
-        marginRight: 10,
+        marginRight: 10, 
+    },
+    cartIconContainer: {
+        position: 'relative',
+    },
+    cartBadge: {
+        position: 'absolute',
+        right: -5,
+        top: -5,
+        backgroundColor: 'red',
+        borderRadius: 10,
+        width: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cartBadgeText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     title: {
         fontSize: 18,
@@ -242,20 +213,47 @@ const styles = StyleSheet.create({
     contentContainer: {
         flex: 1,
     },
+    imageContainer: {
+        position: 'relative',
+    },
     itemImage: {
         width: '100%',
         height: 270,
         resizeMode: 'cover',
+    },
+    categoryOverlay: {
+        position: 'absolute',
+        top: 20,
+        right: 15,
+        backgroundColor: 'rgb(40, 128, 24)',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 4,
+    },
+    categoryText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
     },
     detailsContainer: {
         padding: 16,
         paddingTop: 25,
         flex: 1,
     },
+    nameAndIconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
     itemName: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 8,
+        flex: 1,
+        marginRight: 16,
+    },
+    favoriteButton: {
+        padding: 8,
     },
     itemPrice: {
         fontSize: 18,
@@ -268,6 +266,34 @@ const styles = StyleSheet.create({
         color: '#555',
         lineHeight: 24,
         marginBottom: 24,
+    },
+    allergenesAndCaloriesContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 12,
+    },
+    allergenesContainer: {
+        flex: 1,
+        marginRight: 8,
+    },
+    caloriesContainer: {
+        marginLeft: 8,
+        marginRight: 16,
+    },
+    allergenesTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#000',
+        marginBottom: 4,
+    },
+    itemAllergene: {
+        fontSize: 16,
+        color: '#000',
+    },
+    itemOrigine: {
+        fontSize: 20,
+        color: '#000',
+        marginBottom: 12,
     },
     addToCartButton: {
         backgroundColor: '#2ecc71',
