@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { Alert } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CartContext = createContext();
 
@@ -9,6 +10,33 @@ const MAX_TOTAL_ITEMS = 20;
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [balance, setBalance] = useState(50);
+
+  useEffect(() => {
+    const loadCart = async () => {
+      try {
+        const savedCart = await AsyncStorage.getItem("cartItems");
+        if (savedCart !== null) {
+          setCartItems(JSON.parse(savedCart));
+        }
+      } catch (e) {
+        console.error("Failed to load cart.");
+      }
+    };
+
+    loadCart();
+  }, []);
+
+  useEffect(() => {
+    const saveCart = async () => {
+      try {
+        await AsyncStorage.setItem("cartItems", JSON.stringify(cartItems));
+      } catch (e) {
+        console.error("Failed to save cart.");
+      }
+    };
+
+    saveCart();
+  }, [cartItems]);
 
   const getTotalQuantity = () => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -20,7 +48,6 @@ export const CartProvider = ({ children }) => {
       const currentTotalQuantity = getTotalQuantity();
 
       if (existingItem) {
-        // Vérifier si l'ajout dépasserait la limite par article
         if (existingItem.quantity >= MAX_QUANTITY_PER_ITEM) {
           Alert.alert(
             "Limite atteinte",
@@ -30,7 +57,6 @@ export const CartProvider = ({ children }) => {
         }
       }
 
-      // Vérifier si l'ajout dépasserait la limite totale
       if (currentTotalQuantity >= MAX_TOTAL_ITEMS) {
         Alert.alert(
           "Limite atteinte",
@@ -54,7 +80,6 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    // Vérifier la limite par article
     if (newQuantity > MAX_QUANTITY_PER_ITEM) {
       Alert.alert(
         "Limite atteinte",
@@ -63,13 +88,11 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    // Calculer le nouveau total
     const newTotalQuantity =
       getTotalQuantity() -
       cartItems.find((item) => item.id === itemId).quantity +
       newQuantity;
 
-    // Vérifier la limite totale
     if (newTotalQuantity > MAX_TOTAL_ITEMS) {
       Alert.alert(
         "Limite atteinte",
@@ -123,4 +146,10 @@ export const CartProvider = ({ children }) => {
   );
 };
 
-export const useCart = () => useContext(CartContext);
+export const useCart = () => {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCart must be used within a CartProvider");
+  }
+  return context;
+};
