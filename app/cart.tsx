@@ -1,6 +1,6 @@
 // app/cart.js
-import React from 'react';
-import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Alert, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCart } from '../context/CartContext';
@@ -13,16 +13,37 @@ import Favoris from '../assets/images/favori.png';
 const CartScreen = () => {
     const router = useRouter();
     const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
-
+    const [showDeliveryForm, setShowDeliveryForm] = useState(false);
+    const [deliveryInfo, setDeliveryInfo] = useState({
+        firstName: '',
+        lastName: '',
+        university: '',
+        building: '',
+        phoneNumber: '',
+        address: '',
+        postalCode: '',
+        city: '',
+        additionalInfo: ''
+    });
     const handleCheckout = () => {
         if (cartItems.length === 0) {
             Alert.alert("Panier vide", "Veuillez ajouter des articles à votre panier avant de passer commande.");
             return;
         }
+        setShowDeliveryForm(true);
+    };
+
+    const handleSubmitDeliveryInfo = () => {
+        // Vérification des champs obligatoires
+        if (!deliveryInfo.firstName || !deliveryInfo.lastName || !deliveryInfo.university || !deliveryInfo.phoneNumber || !deliveryInfo.address || !deliveryInfo.postalCode || !deliveryInfo.city) {
+            Alert.alert("Erreur", "Veuillez remplir tous les champs obligatoires");
+            return;
+        }
+
 
         Alert.alert(
-            "Passer commande",
-            "Voulez-vous confirmer votre commande ?",
+            "Confirmer la commande",
+            `Livraison pour ${deliveryInfo.firstName} ${deliveryInfo.lastName}\nà ${deliveryInfo.university}`,
             [
                 {
                     text: "Annuler",
@@ -31,12 +52,105 @@ const CartScreen = () => {
                 {
                     text: "Confirmer",
                     onPress: () => {
+                        setShowDeliveryForm(false);
                         router.push('/sucess-screen');
                     }
                 }
             ]
         );
     };
+
+    const DeliveryFormModal = () => (
+        <Modal
+            visible={showDeliveryForm}
+            animationType="slide"
+            transparent={true}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Informations de livraison</Text>
+
+                    <ScrollView style={styles.formContainer}>
+                        <Text style={styles.inputLabel}>Prénom *</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={deliveryInfo.firstName}
+                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, firstName: text })}
+                            placeholder="Votre prénom"
+                        />
+
+                        <Text style={styles.inputLabel}>Nom *</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={deliveryInfo.lastName}
+                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, lastName: text })}
+                            placeholder="Votre nom"
+                        />
+
+                        <Text style={styles.inputLabel}>Université *</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={deliveryInfo.university}
+                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, university: text })}
+                            placeholder="Nom de votre université"
+                        />
+
+                        <Text style={styles.inputLabel}>Adresse *</Text>
+                        <TextInput style={styles.input} placeholder="Votre adresse" value={deliveryInfo.address} onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, address: text })} />
+
+                        <Text style={styles.inputLabel}>Code Postal *</Text>
+                        <TextInput style={styles.input} placeholder="Votre code postal" keyboardType="numeric" value={deliveryInfo.postalCode} onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, postalCode: text })} />
+
+                        <Text style={styles.inputLabel}>Ville *</Text>
+                        <TextInput style={styles.input} placeholder="Votre ville" value={deliveryInfo.city} onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, city: text })} />
+
+
+                        <Text style={styles.inputLabel}>Bâtiment</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={deliveryInfo.building}
+                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, building: text })}
+                            placeholder="Bâtiment (optionnel)"
+                        />
+
+                        <Text style={styles.inputLabel}>Numéro de téléphone *</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={deliveryInfo.phoneNumber}
+                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, phoneNumber: text })}
+                            placeholder="Votre numéro de téléphone"
+                            keyboardType="phone-pad"
+                        />
+
+                        <Text style={styles.inputLabel}>Informations complémentaires</Text>
+                        <TextInput
+                            style={[styles.input, styles.textArea]}
+                            value={deliveryInfo.additionalInfo}
+                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, additionalInfo: text })}
+                            placeholder="Instructions particulières pour la livraison"
+                            multiline
+                            numberOfLines={4}
+                        />
+                    </ScrollView>
+
+                    <View style={styles.modalButtons}>
+                        <TouchableOpacity
+                            style={[styles.modalButton, styles.cancelButton]}
+                            onPress={() => setShowDeliveryForm(false)}
+                        >
+                            <Text style={styles.cancelButtonText}>Annuler</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.modalButton, styles.confirmButton]}
+                            onPress={handleSubmitDeliveryInfo}
+                        >
+                            <Text style={styles.confirmButtonText}>Valider</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
 
     return (
         <SafeAreaView style={styles.safeContainer}>
@@ -126,6 +240,8 @@ const CartScreen = () => {
                     </View>
                 </>
             )}
+            <DeliveryFormModal />
+
         </SafeAreaView>
     );
 };
@@ -276,6 +392,75 @@ const styles = StyleSheet.create({
     checkoutButtonText: {
         color: '#fff',
         fontSize: 16,
+        fontWeight: 'bold',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 20,
+        width: '90%',
+        maxHeight: '80%',
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+    formContainer: {
+        maxHeight: '80%',
+    },
+    inputLabel: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        marginBottom: 5,
+        color: '#333',
+    },
+    input: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        padding: 10,
+        marginBottom: 15,
+        fontSize: 16,
+    },
+    textArea: {
+        height: 100,
+        textAlignVertical: 'top',
+    },
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+    },
+    modalButton: {
+        flex: 1,
+        padding: 15,
+        borderRadius: 8,
+        marginHorizontal: 5,
+    },
+    cancelButton: {
+        backgroundColor: '#f8f9fa',
+        borderWidth: 1,
+        borderColor: '#ddd',
+    },
+    confirmButton: {
+        backgroundColor: '#2ecc71',
+    },
+    cancelButtonText: {
+        color: '#333',
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
+    confirmButtonText: {
+        color: 'white',
+        textAlign: 'center',
         fontWeight: 'bold',
     },
 });
