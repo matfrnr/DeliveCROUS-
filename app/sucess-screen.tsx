@@ -2,15 +2,19 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useCart } from "@/context/CartContext";
 
-const OrderConfirmationScreen = ({ navigation }) => {
+const OrderConfirmationScreen = () => {
+    const { balance } = useCart();
+
     return (
         <SafeAreaView style={styles.safeContainer}>
-            {/* SafeAreaView pour la navbar */}
             <SafeAreaView style={styles.navbarContainer}>
                 <View style={styles.navbar}>
                     <Text style={styles.title}>DeliveCrous</Text>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.push('/')}
                     >
                         <Ionicons name="arrow-back" size={24} color="black" />
                     </TouchableOpacity>
@@ -18,16 +22,15 @@ const OrderConfirmationScreen = ({ navigation }) => {
             </SafeAreaView>
 
             <View style={styles.contentContainer}>
-                {/* Bouton retour */}
+                <Image
+                    source={require("../assets/images/sucess.png")}
+                    style={styles.image}
+                    resizeMode="contain"
+                />
 
-
-                {/* Illustration */}
-                <Image source={require("../assets/images/sucess.png")} style={styles.image} resizeMode="contain" />
-
-                {/* Message */}
                 <Text style={styles.heading}>Commande envoyée !</Text>
                 <Text style={styles.subtext}>Elle vous attendra à la fin de votre cours ! Régalez vous !</Text>
-                <Text style={styles.balance}>Solde CROUS restant: 19,50 €</Text>
+                <Text style={styles.balance}>Solde CROUS restant: {balance.toFixed(2)} €</Text>
             </View>
         </SafeAreaView>
     );

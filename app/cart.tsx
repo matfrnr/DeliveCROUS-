@@ -10,9 +10,131 @@ import Panier from '../assets/images/paniers.png';
 import Compte from '../assets/images/utilisateur.png';
 import Favoris from '../assets/images/favori.png';
 
+
+const DeliveryFormModal = ({
+    visible,
+    onClose,
+    deliveryInfo,
+    setDeliveryInfo,
+    onSubmit
+}) => (
+    <Modal
+        visible={visible}
+        animationType="slide"
+        transparent={true}
+    >
+        <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Informations de livraison</Text>
+
+                <ScrollView style={styles.formContainer}>
+                    <Text style={styles.inputLabel}>Prénom *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={deliveryInfo.firstName}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, firstName: text })}
+                        placeholder="Votre prénom"
+                    />
+
+                    <Text style={styles.inputLabel}>Nom *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={deliveryInfo.lastName}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, lastName: text })}
+                        placeholder="Votre nom"
+                    />
+
+                    <Text style={styles.inputLabel}>Université *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={deliveryInfo.university}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, university: text })}
+                        placeholder="Nom de votre université"
+                    />
+
+                    <Text style={styles.inputLabel}>Adresse *</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Votre adresse"
+                        value={deliveryInfo.address}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, address: text })}
+                    />
+
+                    <Text style={styles.inputLabel}>Code Postal *</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Votre code postal"
+                        keyboardType="numeric"
+                        value={deliveryInfo.postalCode}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, postalCode: text })}
+                    />
+
+                    <Text style={styles.inputLabel}>Ville *</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Votre ville"
+                        value={deliveryInfo.city}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, city: text })}
+                    />
+
+                    <Text style={styles.inputLabel}>Bâtiment</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={deliveryInfo.building}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, building: text })}
+                        placeholder="Bâtiment (optionnel)"
+                    />
+
+                    <Text style={styles.inputLabel}>Numéro de téléphone *</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={deliveryInfo.phoneNumber}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, phoneNumber: text })}
+                        placeholder="Votre numéro de téléphone"
+                        keyboardType="phone-pad"
+                    />
+
+                    <Text style={styles.inputLabel}>Informations complémentaires</Text>
+                    <TextInput
+                        style={[styles.input, styles.textArea]}
+                        value={deliveryInfo.additionalInfo}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, additionalInfo: text })}
+                        placeholder="Instructions particulières pour la livraison"
+                        multiline
+                        numberOfLines={4}
+                    />
+                </ScrollView>
+
+                <View style={styles.modalButtons}>
+                    <TouchableOpacity
+                        style={[styles.modalButton, styles.cancelButton]}
+                        onPress={onClose}
+                    >
+                        <Text style={styles.cancelButtonText}>Annuler</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.modalButton, styles.confirmButton]}
+                        onPress={onSubmit}
+                    >
+                        <Text style={styles.confirmButtonText}>Valider</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </View>
+    </Modal>
+);
+
 const CartScreen = () => {
     const router = useRouter();
-    const { cartItems, removeFromCart, updateQuantity, getCartTotal } = useCart();
+    const {
+        cartItems,
+        removeFromCart,
+        updateQuantity,
+        getCartTotal,
+        balance,        // Ajout de balance
+        processOrder    // Ajout de processOrder
+    } = useCart();
+
     const [showDeliveryForm, setShowDeliveryForm] = useState(false);
     const [deliveryInfo, setDeliveryInfo] = useState({
         firstName: '',
@@ -25,6 +147,7 @@ const CartScreen = () => {
         city: '',
         additionalInfo: ''
     });
+
     const handleCheckout = () => {
         if (cartItems.length === 0) {
             Alert.alert("Panier vide", "Veuillez ajouter des articles à votre panier avant de passer commande.");
@@ -35,15 +158,25 @@ const CartScreen = () => {
 
     const handleSubmitDeliveryInfo = () => {
         // Vérification des champs obligatoires
-        if (!deliveryInfo.firstName || !deliveryInfo.lastName || !deliveryInfo.university || !deliveryInfo.phoneNumber || !deliveryInfo.address || !deliveryInfo.postalCode || !deliveryInfo.city) {
+        if (!deliveryInfo.firstName || !deliveryInfo.lastName || !deliveryInfo.university ||
+            !deliveryInfo.phoneNumber || !deliveryInfo.address || !deliveryInfo.postalCode ||
+            !deliveryInfo.city) {
             Alert.alert("Erreur", "Veuillez remplir tous les champs obligatoires");
             return;
         }
 
+        const total = getCartTotal();
+        if (total > balance) {
+            Alert.alert(
+                "Solde insuffisant",
+                `Votre solde CROUS (${balance.toFixed(2)}€) ne permet pas de payer cette commande (${total.toFixed(2)}€).`
+            );
+            return;
+        }
 
         Alert.alert(
             "Confirmer la commande",
-            `Livraison pour ${deliveryInfo.firstName} ${deliveryInfo.lastName}\nà ${deliveryInfo.university}`,
+            `Total: ${total.toFixed(2)}€\nSolde actuel: ${balance.toFixed(2)}€\nSolde après achat: ${(balance - total).toFixed(2)}€`,
             [
                 {
                     text: "Annuler",
@@ -52,106 +185,15 @@ const CartScreen = () => {
                 {
                     text: "Confirmer",
                     onPress: () => {
-                        setShowDeliveryForm(false);
-                        router.push('/sucess-screen');
+                        if (processOrder(total)) {
+                            setShowDeliveryForm(false);
+                            router.push('/sucess-screen');
+                        }
                     }
                 }
             ]
         );
     };
-
-    const DeliveryFormModal = () => (
-        <Modal
-            visible={showDeliveryForm}
-            animationType="slide"
-            transparent={true}
-        >
-            <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Informations de livraison</Text>
-
-                    <ScrollView style={styles.formContainer}>
-                        <Text style={styles.inputLabel}>Prénom *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={deliveryInfo.firstName}
-                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, firstName: text })}
-                            placeholder="Votre prénom"
-                        />
-
-                        <Text style={styles.inputLabel}>Nom *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={deliveryInfo.lastName}
-                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, lastName: text })}
-                            placeholder="Votre nom"
-                        />
-
-                        <Text style={styles.inputLabel}>Université *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={deliveryInfo.university}
-                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, university: text })}
-                            placeholder="Nom de votre université"
-                        />
-
-                        <Text style={styles.inputLabel}>Adresse *</Text>
-                        <TextInput style={styles.input} placeholder="Votre adresse" value={deliveryInfo.address} onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, address: text })} />
-
-                        <Text style={styles.inputLabel}>Code Postal *</Text>
-                        <TextInput style={styles.input} placeholder="Votre code postal" keyboardType="numeric" value={deliveryInfo.postalCode} onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, postalCode: text })} />
-
-                        <Text style={styles.inputLabel}>Ville *</Text>
-                        <TextInput style={styles.input} placeholder="Votre ville" value={deliveryInfo.city} onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, city: text })} />
-
-
-                        <Text style={styles.inputLabel}>Bâtiment</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={deliveryInfo.building}
-                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, building: text })}
-                            placeholder="Bâtiment (optionnel)"
-                        />
-
-                        <Text style={styles.inputLabel}>Numéro de téléphone *</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={deliveryInfo.phoneNumber}
-                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, phoneNumber: text })}
-                            placeholder="Votre numéro de téléphone"
-                            keyboardType="phone-pad"
-                        />
-
-                        <Text style={styles.inputLabel}>Informations complémentaires</Text>
-                        <TextInput
-                            style={[styles.input, styles.textArea]}
-                            value={deliveryInfo.additionalInfo}
-                            onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, additionalInfo: text })}
-                            placeholder="Instructions particulières pour la livraison"
-                            multiline
-                            numberOfLines={4}
-                        />
-                    </ScrollView>
-
-                    <View style={styles.modalButtons}>
-                        <TouchableOpacity
-                            style={[styles.modalButton, styles.cancelButton]}
-                            onPress={() => setShowDeliveryForm(false)}
-                        >
-                            <Text style={styles.cancelButtonText}>Annuler</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.modalButton, styles.confirmButton]}
-                            onPress={handleSubmitDeliveryInfo}
-                        >
-                            <Text style={styles.confirmButtonText}>Valider</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        </Modal>
-    );
-
     return (
         <SafeAreaView style={styles.safeContainer}>
             {/* Navbar */}
@@ -183,6 +225,7 @@ const CartScreen = () => {
             </TouchableOpacity>
             <View style={styles.headerContainer}>
                 <Text style={styles.headerTitle}>Mon Panier</Text>
+                <Text>Solde CROUS : {balance.toFixed(2)}€</Text>
             </View>
 
             {cartItems.length === 0 ? (
@@ -240,7 +283,13 @@ const CartScreen = () => {
                     </View>
                 </>
             )}
-            <DeliveryFormModal />
+            <DeliveryFormModal
+                visible={showDeliveryForm}
+                onClose={() => setShowDeliveryForm(false)}
+                deliveryInfo={deliveryInfo}
+                setDeliveryInfo={setDeliveryInfo}
+                onSubmit={handleSubmitDeliveryInfo}
+            />
 
         </SafeAreaView>
     );
