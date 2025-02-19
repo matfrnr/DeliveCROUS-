@@ -558,7 +558,7 @@ const styles = StyleSheet.create({
     modalTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 20,
+        marginBottom: 10,
         textAlign: 'center',
     },
     formContainer: {
@@ -665,7 +665,6 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     ordersContainer: {
-        marginTop: 16,
         paddingBottom: 20,
     },
     ordersButton: {
