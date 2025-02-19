@@ -1,0 +1,182 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "test@test.com",
+      "password": "password123",
+      "nom": "UpdatedName",
+      "prenom": "User",
+      "favoris": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "id": "2",
+      "email": "etudiant@univ.fr",
+      "password": "1234",
+      "nom": "Dupont",
+      "prenom": "Jean",
+      "favoris": [
+        "2"
+      ]
+    },
+    {
+      "id": "fa16",
+      "email": "newuser@test.com",
+      "password": "newpassword",
+      "favoris": []
+    },
+    {
+      "id": "454f",
+      "email": "newuser@example.com",
+      "password": "password123",
+      "nom": "Updated Name",
+      "prenom": "Updated Firstname",
+      "favoris": []
+    },
+    
+    {
+      "id": "54e3",
+      "email": "a",
+      "password": "a",
+      "favoris": [],
+      "nom": "a",
+      "prenom": "a"
+    },
+    
+    {
+      "id": "2861",
+      "email": "a",
+      "password": "a",
+      "favoris": [],
+      "nom": "a",
+      "prenom": "a"
+    },
+    {
+      "id": "f5a4",
+      "email": "a",
+      "password": "a",
+      "nom": "a",
+      "prenom": "a",
+      "favoris": []
+    },
+    {
+      "id": "7d74",
+      "email": "bonjour@bonjour.com",
+      "password": "bonjour",
+      "nom": "bonjour",
+      "prenom": "bonjour",
+      "favoris": []
+    }
+  ],
+  "items": [
+    {
+      "id": "2",
+      "nom": "Pizza 4 Fromages",
+      "description": "Mozzarella, chèvre, bleu, emmental",
+      "prix": 8,
+      "allergenes": [
+        "lait",
+        "gluten"
+      ],
+      "categorie": "pizza",
+      "disponible": true,
+      "image": "pizza4fromages.jpg"
+    },
+    {
+      "id": "3",
+      "nom": "Salade César",
+      "description": "Salade, poulet grillé, croutons, sauce César",
+      "prix": 7,
+      "allergenes": [
+        "gluten",
+        "lait"
+      ],
+      "categorie": "salade",
+      "disponible": true,
+      "image": "salade.jpg"
+    }
+  ],
+  "favoris": [
+    {
+      "userId": "1",
+      "itemId": null,
+      "id": "869e"
+    },
+    {
+      "userId": "1",
+      "itemId": "2",
+      "id": "ceac"
+    },
+    {
+      "userId": "2",
+      "itemId": "2",
+      "id": "f08c"
+    },
+    {
+      "id": "7785",
+      "userId": "1",
+      "itemId": "3"
+    },
+    {
+      "id": "01a3",
+      "userId": 1,
+      "itemId": 2
+    }
+  ],
+  "commands": [
+    {
+      "id": "1",
+      "userId": "1",
+      "items": [
+        {
+          "id": "1",
+          "nom": "Burger Végétarien",
+          "prix": 6.5
+        },
+        {
+          "id": "2",
+          "nom": "Pizza 4 Fromages",
+          "prix": 8
+        }
+      ],
+      "date": "2025-02-19",
+      "time": "12:00",
+      "room": "TP101",
+      "address": "Bâtiment A, Université",
+      "prix": 14.5
+    },
+    {
+      "id": "2",
+      "userId": "2",
+      "items": [
+        {
+          "id": "2",
+          "nom": "Pizza 4 Fromages",
+          "prix": 8
+        }
+      ],
+      "date": "2025-02-19",
+      "time": "13:00",
+      "room": "TD202",
+      "address": "Bâtiment B, Université",
+      "prix": 8
+    },
+    {
+      "id": "7142",
+      "userId": "1",
+      "items": [
+        {
+          "id": "1",
+          "nom": "Burger Végétarien"
+        }
+      ],
+      "date": "2025-02-20",
+      "time": "12:30",
+      "room": "A",
+      "address": "1 Rue Exemple",
+      "prix": 6.5
+    }
+  ]
+}
