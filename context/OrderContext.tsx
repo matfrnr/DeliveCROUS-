@@ -87,7 +87,7 @@ export const OrderProvider = ({ children }) => {
         }
     };
 
-    const removeOrder = async (orderId) => {
+    const removeOrder = async (orderId ) => {
         const updatedOrders = orders.filter(order => order.id !== orderId);
         setOrders(updatedOrders);
 
