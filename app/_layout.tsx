@@ -9,8 +9,6 @@ import { CartProvider } from '@/context/CartContext';
 import { FavoritesProvider } from '@/context/FavoritesContext';
 import { OrderProvider } from '@/context/OrderContext'; // Importer le contexte de commande
 import { useColorScheme } from '@/hooks/useColorScheme';
-import LoginScreen from './LoginScreen';
-import RegisterScreen from './RegisterScreen';
 
 // Empêcher l'écran de splash de se cacher automatiquement avant que le chargement des ressources soit terminé.
 SplashScreen.preventAutoHideAsync();
@@ -39,11 +37,11 @@ export default function RootLayout() {
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
+              <Stack.Screen name="MainScreen" options={{ headerShown: false }} />
               <Stack.Screen name="item-detail" options={{ headerShown: false }} />
               <Stack.Screen name="cart" options={{ headerShown: false }} />
               <Stack.Screen name="success-screen" options={{ headerShown: false }} />
               <Stack.Screen name="favorites" options={{ headerShown: false }} />
-
             </Stack>
             <StatusBar style="auto" />
           </ThemeProvider>

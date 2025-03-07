@@ -49,7 +49,8 @@ function LoginScreen() {
             const response = await login(email, password);
             await AsyncStorage.setItem('userToken', response.token);
             await AsyncStorage.setItem('user', JSON.stringify(response.user));
-            router.replace('/cart');
+            router.replace('/MainScreen'); // If MainScreen is a direct route
+
         } catch (error) {
             Alert.alert(
                 'Échec de connexion',

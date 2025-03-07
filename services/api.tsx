@@ -3,12 +3,19 @@ const users = [
     {
         id: '1',
         email: 'toto@gmail.com',
-        password: 'toto', // In a real app, store hashed passwords
+        password: 'toto',
         nom: 'Toto',
         prenom: 'Toto',
         favoris: ['1', '2'],
     },
-    // ... more users
+    {
+        id: '2',
+        email: 'chef@gmail.com',
+        password: 'chef',
+        nom: 'chef',
+        prenom: 'chef',
+        favoris: ['3'],
+    },
 ];
 
 export const login = async (email, password) => {
