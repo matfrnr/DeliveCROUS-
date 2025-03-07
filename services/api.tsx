@@ -96,10 +96,8 @@ export const getCurrentUser = async () => {
         const userString = await AsyncStorage.getItem('user');
         if (userString) {
             const user = JSON.parse(userString);
-            console.log(`Utilisateur actuel récupéré: ${user.id} (${user.email})`);
             return user;
         }
-        console.log('Aucun utilisateur actuellement connecté');
         return null;
     } catch (e) {
         console.error('Échec de récupération de l\'utilisateur actuel', e);
