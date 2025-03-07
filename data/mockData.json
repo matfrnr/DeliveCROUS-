@@ -59,7 +59,7 @@
     "nom": "Tacos Poulet",
     "description": "Tortilla garnie de poulet grillé, sauce fromagère et légumes frais",
     "prix": 5.0,
-    "image": "https://s3.ca-central-1.amazonaws.com/files.exceldor.ca/files/seo/_1200x630_crop_center-center_82_none_no-date_2023-10-25T15-52-02.png?mtime=1720554819",
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7Hh9GKDqPmdOBKWuILbuamEzDBFSgS-f9BQ&s",
     "allergenes": ["gluten", "lait", "moutarde"],
     "categorie": "plat principal",
     "calories": 550,

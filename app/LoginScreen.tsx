@@ -47,9 +47,13 @@ function LoginScreen() {
         setIsLoading(true);
         try {
             const response = await login(email, password);
+
+            // Stockez le token et l'utilisateur dans AsyncStorage
             await AsyncStorage.setItem('userToken', response.token);
             await AsyncStorage.setItem('user', JSON.stringify(response.user));
-            router.replace('/MainScreen'); // If MainScreen is a direct route
+
+            // Redirigez l'utilisateur vers l'écran principal
+            router.replace('/MainScreen');
 
         } catch (error) {
             Alert.alert(

@@ -58,14 +58,14 @@ const FavoritesScreen = () => {
         <SafeAreaView style={styles.safeContainer}>
             {/* Navbar */}
             <View style={styles.navbar}>
-                <TouchableOpacity onPress={() => router.push('/')}>
+                <TouchableOpacity onPress={() => router.push('/MainScreen')}>
                     <Text style={styles.title}>DeliveCrous</Text>
                 </TouchableOpacity>
                 <View style={styles.navbarImages}>
                     <TouchableOpacity onPress={() => router.push('/favorites')}>
                         <Image source={Favoris} style={[styles.navbarImage, { tintColor: '#2ecc71' }]} />
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => router.push('/user')}>
                         <Image source={Compte} style={styles.navbarImage} />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => router.replace('/cart')}>

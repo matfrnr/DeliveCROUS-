@@ -10,51 +10,74 @@ const MAX_TOTAL_ITEMS = 20;
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [balance, setBalance] = useState(50);
+  const [userId, setUserId] = useState(null);
 
-  // Charger le panier et le solde au démarrage
   useEffect(() => {
-    const loadData = async () => {
+    const loadUserAndData = async () => {
       try {
-        const savedCart = await AsyncStorage.getItem("cartItems");
-        const savedBalance = await AsyncStorage.getItem("balance");
-
-        if (savedCart) {
-          setCartItems(JSON.parse(savedCart));
-        }
-
-        if (savedBalance !== null) {
-          setBalance(parseFloat(savedBalance));
+        const userString = await AsyncStorage.getItem("user");
+        if (userString) {
+          const user = JSON.parse(userString);
+          setUserId(user.id);
+          await loadData(user.id);
         }
       } catch (e) {
-        console.error("Erreur lors du chargement des données :", e);
+        console.error(
+          "Erreur lors du chargement de l'utilisateur ou des données :",
+          e
+        );
       }
     };
 
-    loadData();
+    loadUserAndData();
   }, []);
 
-  // Sauvegarde automatique du panier
+  const loadData = async (userId) => {
+    try {
+      const savedCart = await AsyncStorage.getItem(`cartItems_${userId}`);
+      const savedBalance = await AsyncStorage.getItem(`balance_${userId}`);
+
+      if (savedCart) {
+        setCartItems(JSON.parse(savedCart));
+      } else {
+        setCartItems([]);
+      }
+
+      if (savedBalance !== null) {
+        setBalance(parseFloat(savedBalance));
+      }
+    } catch (e) {
+      console.error("Erreur lors du chargement des données :", e);
+    }
+  };
+
   useEffect(() => {
     const saveCart = async () => {
-      try {
-        await AsyncStorage.setItem("cartItems", JSON.stringify(cartItems));
-      } catch (e) {
-        console.error("Erreur lors de la sauvegarde du panier :", e);
+      if (userId) {
+        try {
+          await AsyncStorage.setItem(
+            `cartItems_${userId}`,
+            JSON.stringify(cartItems)
+          );
+        } catch (e) {
+          console.error("Erreur lors de la sauvegarde du panier :", e);
+        }
       }
     };
 
     if (cartItems.length >= 0) {
       saveCart();
     }
-  }, [cartItems]);
+  }, [cartItems, userId]);
 
-  // Fonction pour mettre à jour et enregistrer le solde
   const setBalanceAndSave = async (newBalance) => {
-    try {
-      setBalance(newBalance);
-      await AsyncStorage.setItem("balance", newBalance.toString());
-    } catch (e) {
-      console.error("Erreur lors de la sauvegarde du solde :", e);
+    if (userId) {
+      try {
+        setBalance(newBalance);
+        await AsyncStorage.setItem(`balance_${userId}`, newBalance.toString());
+      } catch (e) {
+        console.error("Erreur lors de la sauvegarde du solde :", e);
+      }
     }
   };
 
@@ -145,11 +168,13 @@ export const CartProvider = ({ children }) => {
     }
 
     const newBalance = balance - total;
-    await setBalanceAndSave(newBalance); // Sauvegarde du solde immédiatement
-    setCartItems([]); // Vider le panier
+    await setBalanceAndSave(newBalance);
+    setCartItems([]);
 
     try {
-      await AsyncStorage.setItem("cartItems", JSON.stringify([]));
+      if (userId) {
+        await AsyncStorage.setItem(`cartItems_${userId}`, JSON.stringify([]));
+      }
     } catch (error) {
       console.error(
         "Erreur lors de la mise à jour du panier après commande :",

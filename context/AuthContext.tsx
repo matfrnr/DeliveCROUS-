@@ -12,7 +12,7 @@ export const withAuth = (WrappedComponent) => {
       const checkToken = async () => {
         const token = await AsyncStorage.getItem("userToken");
         if (!token) {
-          router.replace("/login"); // Redirect to login if no token
+          router.replace("/LoginScreen"); // Redirect to login if no token
         }
         setIsLoading(false);
       };

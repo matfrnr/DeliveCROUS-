@@ -1,3 +1,4 @@
+// FavoritesContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -5,41 +6,62 @@ const FavoritesContext = createContext();
 
 export const FavoritesProvider = ({ children }) => {
   const [favorites, setFavorites] = useState([]);
+  const [userId, setUserId] = useState(null); // Ajout de l'état pour l'ID de l'utilisateur
 
   useEffect(() => {
-    const loadFavorites = async () => {
+    const loadUserAndFavorites = async () => {
       try {
-        const savedFavorites = await AsyncStorage.getItem("favorites");
-        if (savedFavorites !== null) {
-          setFavorites(JSON.parse(savedFavorites));
+        const userString = await AsyncStorage.getItem("user");
+        if (userString) {
+          const user = JSON.parse(userString);
+          setUserId(user.id);
+          await loadFavorites(user.id); // Charge les favoris spécifiques à l'utilisateur
         }
       } catch (e) {
-        console.error("Failed to load favorites.");
+        console.error("Failed to load user or favorites.");
       }
     };
 
-    loadFavorites();
+    loadUserAndFavorites();
   }, []);
 
+  const loadFavorites = async (userId) => {
+    try {
+      const savedFavorites = await AsyncStorage.getItem(`favorites_${userId}`);
+      if (savedFavorites !== null) {
+        setFavorites(JSON.parse(savedFavorites));
+      }
+    } catch (e) {
+      console.error("Failed to load favorites.");
+    }
+  };
+
+  const saveFavorites = async (userId, newFavorites) => {
+    try {
+      await AsyncStorage.setItem(
+        `favorites_${userId}`,
+        JSON.stringify(newFavorites)
+      );
+    } catch (e) {
+      console.error("Failed to save favorites.");
+    }
+  };
+
   const addToFavorites = async (item) => {
-    if (!favorites.some((favItem) => favItem.id === item.id)) {
-      const newFavorites = [...favorites, item];
-      setFavorites(newFavorites);
-      try {
-        await AsyncStorage.setItem("favorites", JSON.stringify(newFavorites));
-      } catch (e) {
-        console.error("Failed to save favorites.");
+    if (userId) {
+      if (!favorites.some((favItem) => favItem.id === item.id)) {
+        const newFavorites = [...favorites, item];
+        setFavorites(newFavorites);
+        await saveFavorites(userId, newFavorites);
       }
     }
   };
 
   const removeFromFavorites = async (itemId) => {
-    const newFavorites = favorites.filter((item) => item.id !== itemId);
-    setFavorites(newFavorites);
-    try {
-      await AsyncStorage.setItem("favorites", JSON.stringify(newFavorites));
-    } catch (e) {
-      console.error("Failed to save favorites.");
+    if (userId) {
+      const newFavorites = favorites.filter((item) => item.id !== itemId);
+      setFavorites(newFavorites);
+      await saveFavorites(userId, newFavorites);
     }
   };
 

@@ -256,14 +256,14 @@ const CartScreen = () => {
             {/* Navbar */}
             <SafeAreaView style={styles.navbarContainer}>
                 <View style={styles.navbar}>
-                    <TouchableOpacity onPress={() => router.push('/')}>
+                    <TouchableOpacity onPress={() => router.push('/MainScreen')}>
                         <Text style={styles.title}>DeliveCrous</Text>
                     </TouchableOpacity>
                     <View style={styles.navbarImages}>
                         <TouchableOpacity onPress={() => router.replace('/favorites')}>
                             <Image source={Favoris} style={styles.navbarImage} />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => router.push('/user')}>
                             <Image source={Compte} style={styles.navbarImage} />
                         </TouchableOpacity>
                         <TouchableOpacity>
