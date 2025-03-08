@@ -27,7 +27,6 @@ export const login = async (email, password) => {
         try {
             // Récupérer d'abord l'utilisateur actuel (s'il existe)
             const currentUserString = await AsyncStorage.getItem('user');
-
             // Sauvegarder le nouvel utilisateur
             await AsyncStorage.setItem('user', JSON.stringify(user));
 

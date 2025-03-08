@@ -7,36 +7,77 @@ const CartContext = createContext();
 // Constants for cart limitations
 const MAX_QUANTITY_PER_ITEM = 5;
 const MAX_TOTAL_ITEMS = 20;
+const DEFAULT_BALANCE = 50; // Default balance for new users
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
-  const [balance, setBalance] = useState(50); // Default balance
+  const [balance, setBalance] = useState(DEFAULT_BALANCE);
   const [userId, setUserId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Effect to monitor user changes and load appropriate cart data
+  // Effect to load user data on mount (this runs only once)
   useEffect(() => {
-    const checkUserStatus = async () => {
+    const loadInitialUserData = async () => {
       try {
         setIsLoading(true);
+        const userString = await AsyncStorage.getItem("user");
+
+        if (userString) {
+          const user = JSON.parse(userString);
+          setUserId(user.id);
+
+          // Load cart data for user
+          const savedCart = await AsyncStorage.getItem(`cartItems_${user.id}`);
+          if (savedCart) {
+            setCartItems(JSON.parse(savedCart));
+          }
+
+          // Load balance for user
+          const savedBalance = await AsyncStorage.getItem(`balance_${user.id}`);
+          if (savedBalance !== null) {
+            setBalance(parseFloat(savedBalance));
+          } else {
+            // If no saved balance, set default and save it
+            await AsyncStorage.setItem(
+              `balance_${user.id}`,
+              DEFAULT_BALANCE.toString()
+            );
+          }
+        }
+
+        setIsLoading(false);
+      } catch (e) {
+        console.error("Error loading initial user data:", e);
+        setIsLoading(false);
+      }
+    };
+
+    loadInitialUserData();
+  }, []);
+
+  // Effect to monitor user changes
+  useEffect(() => {
+    const userChangeListener = async () => {
+      try {
         const userString = await AsyncStorage.getItem("user");
 
         // If no user is logged in
         if (!userString) {
           if (userId) {
-            // Save current cart for previous user before clearing
+            // Save current cart and balance for previous user before clearing
             if (cartItems.length > 0) {
               await AsyncStorage.setItem(
                 `cartItems_${userId}`,
                 JSON.stringify(cartItems)
               );
             }
-            // Clear user data
+            await saveBalance(balance);
+
+            // Clear user data in state
             setUserId(null);
             setCartItems([]);
-            setBalance(50); // Reset to default
+            setBalance(DEFAULT_BALANCE);
           }
-          setIsLoading(false);
           return;
         }
 
@@ -45,12 +86,15 @@ export const CartProvider = ({ children }) => {
 
         // If this is a new user or user has changed
         if (user.id !== userId) {
-          // Save cart data for previous user if needed
-          if (userId && cartItems.length > 0) {
-            await AsyncStorage.setItem(
-              `cartItems_${userId}`,
-              JSON.stringify(cartItems)
-            );
+          // Save cart data and balance for previous user if needed
+          if (userId) {
+            if (cartItems.length > 0) {
+              await AsyncStorage.setItem(
+                `cartItems_${userId}`,
+                JSON.stringify(cartItems)
+              );
+            }
+            await saveBalance(balance);
           }
 
           // Set new user
@@ -60,43 +104,34 @@ export const CartProvider = ({ children }) => {
           const savedCart = await AsyncStorage.getItem(`cartItems_${user.id}`);
           const savedBalance = await AsyncStorage.getItem(`balance_${user.id}`);
 
+          // Set cart items
           if (savedCart) {
             setCartItems(JSON.parse(savedCart));
           } else {
             setCartItems([]);
           }
 
+          // Set balance
           if (savedBalance !== null) {
             setBalance(parseFloat(savedBalance));
           } else {
-            setBalance(50); // Default balance for new users
+            // If no saved balance, set default and save it
+            setBalance(DEFAULT_BALANCE);
+            await AsyncStorage.setItem(
+              `balance_${user.id}`,
+              DEFAULT_BALANCE.toString()
+            );
           }
         }
-        setIsLoading(false);
       } catch (e) {
         console.error("Error checking user status:", e);
-        setIsLoading(false);
       }
     };
 
-    // Check immediately on mount
-    checkUserStatus();
-
-    // Set up a listener for user changes
-    const intervalId = setInterval(checkUserStatus, 1000);
+    // Set up the interval for checking user changes
+    const intervalId = setInterval(userChangeListener, 1000);
     return () => clearInterval(intervalId);
-  }, [userId, cartItems]);
-
-  // Helper function to save cart to AsyncStorage
-  const saveCart = async (items) => {
-    if (!userId) return;
-
-    try {
-      await AsyncStorage.setItem(`cartItems_${userId}`, JSON.stringify(items));
-    } catch (e) {
-      console.error("Error saving cart:", e);
-    }
-  };
+  }, [userId, cartItems, balance]);
 
   // Helper function to save balance
   const saveBalance = async (newBalance) => {
@@ -106,6 +141,17 @@ export const CartProvider = ({ children }) => {
       await AsyncStorage.setItem(`balance_${userId}`, newBalance.toString());
     } catch (e) {
       console.error("Error saving balance:", e);
+    }
+  };
+
+  // Helper function to save cart to AsyncStorage
+  const saveCart = async (items) => {
+    if (!userId) return;
+
+    try {
+      await AsyncStorage.setItem(`cartItems_${userId}`, JSON.stringify(items));
+    } catch (e) {
+      console.error("Error saving cart:", e);
     }
   };
 
@@ -226,13 +272,15 @@ export const CartProvider = ({ children }) => {
   };
 
   // Process order
-  const processOrder = async () => {
+  const processOrder = async (total) => {
     if (!userId) {
       Alert.alert("Error", "You must be logged in to complete an order");
       return false;
     }
 
-    const total = getCartTotal();
+    if (!total) {
+      total = getCartTotal();
+    }
 
     if (total > balance) {
       Alert.alert(
@@ -265,7 +313,10 @@ export const CartProvider = ({ children }) => {
 
   // Add funds to balance (for demo purposes)
   const addFunds = async (amount) => {
-    if (!userId) return false;
+    if (!userId) {
+      Alert.alert("Error", "You must be logged in to add funds");
+      return false;
+    }
 
     const newBalance = balance + amount;
     setBalance(newBalance);
