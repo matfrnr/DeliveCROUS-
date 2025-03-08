@@ -2,38 +2,52 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, Image, SafeAreaView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
 
-import Panier from '../assets/images/paniers.png';
-import Compte from '../assets/images/utilisateur.png';
-import Favoris from '../assets/images/favori.png';
+import Panier from '../../assets/images/paniers.png';
+import Compte from '../../assets/images/utilisateur.png';
+import Favoris from '../../assets/images/favori.png';
 import { Ionicons } from '@expo/vector-icons';
 
+interface User {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+}
 
 const UserScreen = () => {
-  const [user, setUser] = useState(null);
+  // État pour stocker les informations de l'utilisateur
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  // Utilisation du contexte pour le panier
   const { cartItems, addToCart } = useCart();
-  const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
+  // Calcul du nombre total d'articles dans le panier
+  const totalItemsInCart = cartItems.reduce((total: number, item: any) => total + item.quantity, 0);
 
+  // Effet pour charger les informations de l'utilisateur au montage du composant
   useEffect(() => {
     const loadUser = async () => {
       try {
+        // Récupération des informations de l'utilisateur depuis AsyncStorage
         const userString = await AsyncStorage.getItem('user');
         if (userString) {
           setUser(JSON.parse(userString));
         } else {
-          router.replace('/LoginScreen'); // Redirige si l'utilisateur n'est pas connecté
+          // Redirection vers l'écran de connexion si l'utilisateur n'est pas connecté
+          router.replace('/screen/LoginScreen');
         }
       } catch (error) {
         console.error('Erreur lors du chargement de l\'utilisateur :', error);
-        router.replace('/LoginScreen'); // Redirige en cas d'erreur
+        // Redirection vers l'écran de connexion en cas d'erreur
+        router.replace('/screen/LoginScreen');
       }
     };
 
     loadUser();
   }, [router]);
 
+  // Fonction pour gérer la déconnexion de l'utilisateur
   const handleLogout = async () => {
     Alert.alert(
       'Déconnexion',
@@ -47,12 +61,17 @@ const UserScreen = () => {
           text: 'Oui',
           onPress: async () => {
             try {
+              // Suppression des informations de l'utilisateur et du token de AsyncStorage
               await AsyncStorage.removeItem('user');
               await AsyncStorage.removeItem('userToken');
-              await AsyncStorage.removeItem('cartItems_' + user.id);
-              await AsyncStorage.removeItem('balance_' + user.id);
-              await AsyncStorage.removeItem('favorites_' + user.id);
-              router.replace('/LoginScreen');
+              // Suppression des données liées à l'utilisateur si elles existent
+              if (user) {
+                await AsyncStorage.removeItem('cartItems_' + user.id);
+                await AsyncStorage.removeItem('balance_' + user.id);
+                await AsyncStorage.removeItem('favorites_' + user.id);
+              }
+              // Redirection vers l'écran de connexion après la déconnexion
+              router.replace('/screen/LoginScreen');
             } catch (error) {
               console.error('Erreur lors de la déconnexion :', error);
             }
@@ -63,6 +82,7 @@ const UserScreen = () => {
     );
   };
 
+  // Affichage d'un message de chargement si les informations de l'utilisateur ne sont pas encore disponibles
   if (!user) {
     return (
       <View>
@@ -76,17 +96,17 @@ const UserScreen = () => {
       {/* Navbar */}
       <SafeAreaView style={styles.navbarContainer}>
         <View style={styles.navbar}>
-          <TouchableOpacity onPress={() => router.push('/MainScreen')}>
+          <TouchableOpacity onPress={() => router.push('/screen/MainScreen')}>
             <Text style={styles.title}>DeliveCrous</Text>
           </TouchableOpacity>
           <View style={styles.navbarImages}>
-            <TouchableOpacity onPress={() => router.push('/favorites')}>
+            <TouchableOpacity onPress={() => router.push('/screen/favorites')}>
               <Image source={Favoris} style={styles.navbarImage} />
             </TouchableOpacity>
             <TouchableOpacity>
               <Image source={Compte} style={[styles.navbarImage, { tintColor: '#2ecc71' }]} />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push('/cart')}>
+            <TouchableOpacity onPress={() => router.push('/screen/cart')}>
               <View style={styles.cartIconContainer}>
                 <Image source={Panier} style={styles.navbarImage} />
                 {totalItemsInCart > 0 && (
@@ -103,7 +123,7 @@ const UserScreen = () => {
       {/* Contenu de l'écran User */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => router.back()}
+        onPress={() => router.push('/screen/MainScreen')}
       >
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
@@ -127,7 +147,6 @@ const UserScreen = () => {
     </SafeAreaView>
   );
 };
-
 
 
 const styles = StyleSheet.create({

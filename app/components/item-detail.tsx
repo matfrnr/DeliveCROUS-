@@ -1,30 +1,31 @@
-// app/item-detail.js
 import React from 'react';
 import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useCart } from '../context/CartContext';
-import { useFavorites } from '../context/FavoritesContext';
+import { useCart } from '../../context/CartContext';
+import { useFavorites } from '../../context/FavoritesContext';
 
-// Import des images de la navbar
-import Panier from '../assets/images/paniers.png'; // Importez l'image locale
-import Compte from '../assets/images/utilisateur.png';
-import Favoris from '../assets/images/favori.png';
+import Panier from '../../assets/images/paniers.png';
+import Compte from '../../assets/images/utilisateur.png';
+import Favoris from '../../assets/images/favori.png';
 
 const ItemDetailScreen = () => {
+    // Utilisation de useRouter pour la navigation et useLocalSearchParams pour récupérer les paramètres de l'URL
     const router = useRouter();
     const params = useLocalSearchParams();
+    // Utilisation des contextes pour gérer le panier et les favoris
     const { cartItems, addToCart } = useCart();
     const { isFavorite, addToFavorites, removeFromFavorites } = useFavorites();
-    const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
+    // Calcul du nombre total d'articles dans le panier
+    const totalItemsInCart = cartItems.reduce((total: number, item: any) => total + item.quantity, 0);
 
-    // Reconstruction de l'objet item à partir des paramètres
+    // Création de l'objet item à partir des paramètres récupérés
     const item = {
         id: params.id,
         nom: params.nom,
         description: params.description,
-        prix: parseFloat(params.prix),
+        prix: parseFloat(Array.isArray(params.prix) ? params.prix[0] : params.prix),
         image: params.image,
         allergenes: params.allergenes,
         categorie: params.categorie,
@@ -32,11 +33,13 @@ const ItemDetailScreen = () => {
         origine: params.origine
     };
 
+    // Fonction pour ajouter l'article au panier
     const handleAddToCart = () => {
         addToCart(item);
         Alert.alert("Ajouté au panier", `${item.nom} a été ajouté à votre panier`);
     };
 
+    // Fonction pour gérer l'ajout/suppression des favoris
     const handleFavoriteToggle = () => {
         if (isFavorite(item.id)) {
             removeFromFavorites(item.id);
@@ -47,22 +50,23 @@ const ItemDetailScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeContainer}>
-            {/* Navbar */}
+            {/* Barre de navigation */}
             <SafeAreaView style={styles.navbarContainer}>
                 <View style={styles.navbar}>
-                    <TouchableOpacity onPress={() => router.push('/MainScreen')}>
+                    <TouchableOpacity onPress={() => router.push('/screen/MainScreen')}>
                         <Text style={styles.title}>DeliveCrous</Text>
                     </TouchableOpacity>
                     <View style={styles.navbarImages}>
-                        <TouchableOpacity onPress={() => router.push('/favorites')}>
+                        <TouchableOpacity onPress={() => router.push('/screen/favorites')}>
                             <Image source={Favoris} style={styles.navbarImage} />
                         </TouchableOpacity>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => router.push('/screen/user')}>
                             <Image source={Compte} style={styles.navbarImage} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => router.push('/cart')}>
+                        <TouchableOpacity onPress={() => router.push('/screen/cart')}>
                             <View style={styles.cartIconContainer}>
                                 <Image source={Panier} style={styles.navbarImage} />
+                                {/* Affichage du badge du panier si des articles sont présents */}
                                 {totalItemsInCart > 0 && (
                                     <View style={styles.cartBadge}>
                                         <Text style={styles.cartBadgeText}>{totalItemsInCart}</Text>
@@ -74,7 +78,7 @@ const ItemDetailScreen = () => {
                 </View>
             </SafeAreaView>
 
-            {/* Bouton retour */}
+            {/* Bouton de retour */}
             <TouchableOpacity
                 style={styles.backButton}
                 onPress={() => router.back()}
@@ -82,16 +86,16 @@ const ItemDetailScreen = () => {
                 <Ionicons name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
 
+            {/* Contenu principal de l'écran */}
             <ScrollView style={styles.contentContainer}>
-                {/* Image du produit */}
                 <View style={styles.imageContainer}>
-                    <Image source={{ uri: item.image }} style={styles.itemImage} />
+                    <Image source={{ uri: Array.isArray(item.image) ? item.image[0] : item.image }} style={styles.itemImage} />
+                    {/* Overlay de la catégorie */}
                     <View style={styles.categoryOverlay}>
                         <Text style={styles.categoryText}>{item.categorie}</Text>
                     </View>
                 </View>
 
-                {/* Informations du produit */}
                 <View style={styles.detailsContainer}>
                     <View style={styles.nameAndIconContainer}>
                         <Text style={styles.itemName}>{item.nom}</Text>
@@ -99,6 +103,7 @@ const ItemDetailScreen = () => {
                             onPress={handleFavoriteToggle}
                             style={styles.favoriteButton}
                         >
+                            {/* Affichage de l'icône de favori en fonction de l'état */}
                             <Icon
                                 name={isFavorite(item.id) ? 'heart' : 'heart-outline'}
                                 size={30}
@@ -113,6 +118,7 @@ const ItemDetailScreen = () => {
                     <View style={styles.allergenesAndCaloriesContainer}>
                         <View style={styles.allergenesContainer}>
                             <Text style={styles.allergenesTitle}>Allergènes:</Text>
+                            {/* Affichage des allergènes en fonction du format des données */}
                             {Array.isArray(item.allergenes) ? (
                                 item.allergenes.map((allergene, index) => (
                                     <Text key={index} style={styles.itemAllergene}>{allergene}</Text>
@@ -131,7 +137,6 @@ const ItemDetailScreen = () => {
 
                     <Text style={styles.itemOrigine}>{item.origine}</Text>
 
-                    {/* Bouton ajouter au panier */}
                     <TouchableOpacity
                         style={styles.addToCartButton}
                         onPress={handleAddToCart}
@@ -143,6 +148,7 @@ const ItemDetailScreen = () => {
         </SafeAreaView>
     );
 };
+
 
 const styles = StyleSheet.create({
     safeContainer: {
@@ -172,7 +178,7 @@ const styles = StyleSheet.create({
     navbarImage: {
         width: 25,
         height: 25,
-        marginRight: 10, 
+        marginRight: 10,
     },
     cartIconContainer: {
         position: 'relative',

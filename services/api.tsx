@@ -17,7 +17,7 @@ const users = [
     },
 ];
 
-export const login = async (email, password) => {
+export const login = async (email: string, password: any) => {
     const user = users.find((u) => u.email === email && u.password === password);
     if (user) {
         // Générer un JWT ou un token simple pour cet exemple
@@ -29,9 +29,6 @@ export const login = async (email, password) => {
             const currentUserString = await AsyncStorage.getItem('user');
             // Sauvegarder le nouvel utilisateur
             await AsyncStorage.setItem('user', JSON.stringify(user));
-
-            // Journaliser pour le débogage
-            console.log(`Connexion réussie: Utilisateur ${user.id} (${user.email})`);
         } catch (e) {
             console.error('Échec de sauvegarde de l\'utilisateur dans AsyncStorage', e);
         }
@@ -48,13 +45,6 @@ export const logout = async () => {
         if (userString) {
             const user = JSON.parse(userString);
             console.log(`Déconnexion de l'utilisateur ${user.id} (${user.email})`);
-
-            // Vérifier si nous avons des favoris stockés en mémoire à sauvegarder
-            // (cette partie dépend de comment vous gérez l'état global, ici c'est juste pour
-            // montrer le concept)
-
-            // Note: Les favoris devraient déjà être sauvegardés par le FavoritesContext
-            // mais nous pouvons vérifier qu'ils existent bien
             const favoritesKey = `favorites_${user.id}`;
             const hasFavorites = await AsyncStorage.getItem(favoritesKey);
         }
@@ -70,8 +60,7 @@ export const logout = async () => {
     }
 };
 
-export const register = async (userData) => {
-    // Dans une vraie application, vous enverriez userData à votre backend
+export const register = async (userData: any) => {
     const newUser = {
         id: (users.length + 1).toString(),
         ...userData,

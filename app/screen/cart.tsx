@@ -1,16 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Alert, Modal, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCart } from '../context/CartContext';
-import { useOrder } from '../context/OrderContext'; // Importer le contexte de commande
+import { useCart } from '../../context/CartContext';
+import { useOrder } from '../../context/OrderContext';
 
-// Importez les mêmes images que dans HomeScreen
-import Panier from '../assets/images/paniers.png';
-import Compte from '../assets/images/utilisateur.png';
-import Favoris from '../assets/images/favori.png';
+import Panier from '../../assets/images/paniers.png';
+import Compte from '../../assets/images/utilisateur.png';
+import Favoris from '../../assets/images/favori.png';
 
-const DeliveryFormModal = ({
+// Interface pour les informations de livraison
+interface DeliveryInfo {
+    firstName: string;
+    lastName: string;
+    university: string;
+    building?: string;
+    phoneNumber: string;
+    address: string;
+    postalCode: string;
+    city: string;
+    additionalInfo?: string;
+}
+
+// Interface pour les props du composant DeliveryFormModal
+interface DeliveryFormModalProps {
+    visible: boolean;
+    onClose: () => void;
+    deliveryInfo: DeliveryInfo;
+    setDeliveryInfo: React.Dispatch<React.SetStateAction<DeliveryInfo>>;
+    onSubmit: () => void;
+}
+
+const DeliveryFormModal: React.FC<DeliveryFormModalProps> = ({
     visible,
     onClose,
     deliveryInfo,
@@ -84,6 +105,14 @@ const DeliveryFormModal = ({
                         placeholder="Bâtiment (optionnel)"
                     />
 
+                    <Text style={styles.inputLabel}>Salle</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={deliveryInfo.building}
+                        onChangeText={(text) => setDeliveryInfo({ ...deliveryInfo, building: text })}
+                        placeholder="Salle (optionnel)"
+                    />
+
                     <Text style={styles.inputLabel}>Numéro de téléphone *</Text>
                     <TextInput
                         style={styles.input}
@@ -123,13 +152,34 @@ const DeliveryFormModal = ({
     </Modal>
 );
 
-const OrderTrackingCard = ({ order, formatTime }) => (
+// Interface pour les items de commande
+interface OrderItem {
+    id: string;
+    nom: string;
+    quantity: number;
+}
+
+// Interface pour les commandes
+interface Order {
+    id: string;
+    status: 'in-progress' | 'delivered';
+    items: OrderItem[];
+    remainingTime?: number;
+}
+
+// Interface pour les props du composant OrderTrackingCard
+interface OrderTrackingCardProps {
+    order: Order;
+    formatTime: (seconds: number) => string;
+}
+
+const OrderTrackingCard: React.FC<OrderTrackingCardProps> = ({ order, formatTime }) => (
     <View style={styles.orderTrackingCard}>
         <Text style={styles.orderTrackingTitle}>Commande {order.status === 'delivered' ? 'livrée' : 'en cours'}</Text>
         {order.status === 'in-progress' && (
             <>
                 <Text style={styles.orderTrackingStatus}>En cours de préparation</Text>
-                <Text style={styles.orderTrackingETA}>Arrivée estimée dans {formatTime(order.remainingTime)}</Text>
+                <Text style={styles.orderTrackingETA}>Arrivée estimée dans {formatTime(order.remainingTime!)}</Text>
             </>
         )}
         <View style={styles.orderItemsContainer}>
@@ -143,7 +193,15 @@ const OrderTrackingCard = ({ order, formatTime }) => (
     </View>
 );
 
-const OrdersPopup = ({ visible, onClose, orders, formatTime }) => (
+// Interface pour les props du composant OrdersPopup
+interface OrdersPopupProps {
+    visible: boolean;
+    onClose: () => void;
+    orders: Order[];
+    formatTime: (seconds: number) => string;
+}
+
+const OrdersPopup: React.FC<OrdersPopupProps> = ({ visible, onClose, orders, formatTime }) => (
     <Modal
         visible={visible}
         animationType="slide"
@@ -172,7 +230,16 @@ const OrdersPopup = ({ visible, onClose, orders, formatTime }) => (
     </Modal>
 );
 
-const CartScreen = () => {
+// Interface pour les items du panier
+interface CartItem {
+    id: string;
+    nom: string;
+    prix: number;
+    quantity: number;
+    image: string;
+}
+
+const CartScreen: React.FC = () => {
     const router = useRouter();
     const {
         cartItems,
@@ -183,10 +250,10 @@ const CartScreen = () => {
         processOrder
     } = useCart();
     const { orders, addOrder } = useOrder();
-    const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
+    const totalItemsInCart = cartItems.reduce((total: number, item: any) => total + item.quantity, 0);
     const [showDeliveryForm, setShowDeliveryForm] = useState(false);
     const [showOrdersPopup, setShowOrdersPopup] = useState(false);
-    const [deliveryInfo, setDeliveryInfo] = useState({
+    const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
         firstName: '',
         lastName: '',
         university: '',
@@ -237,7 +304,7 @@ const CartScreen = () => {
                         if (processOrder(total)) {
                             addOrder([...cartItems]);
                             setShowDeliveryForm(false);
-                            router.push('/success-screen');
+                            router.push('/components/success-screen');
                         }
                     }
                 }
@@ -245,7 +312,7 @@ const CartScreen = () => {
         );
     };
 
-    const formatTime = (seconds) => {
+    const formatTime = (seconds: number): string => {
         const minutes = Math.floor(seconds / 60);
         const remainingSeconds = seconds % 60;
         return `${minutes} min ${remainingSeconds} s`;
@@ -256,14 +323,14 @@ const CartScreen = () => {
             {/* Navbar */}
             <SafeAreaView style={styles.navbarContainer}>
                 <View style={styles.navbar}>
-                    <TouchableOpacity onPress={() => router.push('/MainScreen')}>
+                    <TouchableOpacity onPress={() => router.push('/screen/MainScreen')}>
                         <Text style={styles.title}>DeliveCrous</Text>
                     </TouchableOpacity>
                     <View style={styles.navbarImages}>
-                        <TouchableOpacity onPress={() => router.replace('/favorites')}>
+                        <TouchableOpacity onPress={() => router.replace('/screen/favorites')}>
                             <Image source={Favoris} style={styles.navbarImage} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => router.push('/user')}>
+                        <TouchableOpacity onPress={() => router.push('/screen/user')}>
                             <Image source={Compte} style={styles.navbarImage} />
                         </TouchableOpacity>
                         <TouchableOpacity>
@@ -283,7 +350,7 @@ const CartScreen = () => {
             {/* Bouton retour */}
             <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => router.back()}
+                onPress={() => router.push('/screen/MainScreen')}
             >
                 <Ionicons name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
@@ -306,7 +373,7 @@ const CartScreen = () => {
             ) : (
                 <>
                     <ScrollView style={styles.cartItemsContainer}>
-                        {cartItems.map((item) => (
+                        {cartItems.map((item: any) => (
                             <View key={item.id} style={styles.cartItemContainer}>
                                 <Image source={{ uri: item.image }} style={styles.itemImage} />
                                 <View style={styles.itemDetailsContainer}>
@@ -423,7 +490,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-
     cartBadgeText: {
         color: 'white',
         fontSize: 12,

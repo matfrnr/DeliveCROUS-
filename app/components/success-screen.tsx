@@ -5,13 +5,16 @@ import { router } from "expo-router";
 import { useCart } from "@/context/CartContext";
 
 const OrderConfirmationScreen = () => {
+    // Récupération du solde depuis le contexte du panier.
     const { balance } = useCart();
 
     return (
         <SafeAreaView style={styles.safeContainer}>
+            {/* Barre de navigation */}
             <SafeAreaView style={styles.navbarContainer}>
                 <View style={styles.navbar}>
                     <Text style={styles.title}>DeliveCrous</Text>
+                    {/* Bouton de retour */}
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => router.back()}
@@ -21,15 +24,20 @@ const OrderConfirmationScreen = () => {
                 </View>
             </SafeAreaView>
 
+            {/* Contenu principal de l'écran */}
             <View style={styles.contentContainer}>
+                {/* Image de confirmation de commande réussie */}
                 <Image
-                    source={require("../assets/images/sucess.png")}
+                    source={require("../../assets/images/sucess.png")}
                     style={styles.image}
                     resizeMode="contain"
                 />
 
+                {/* Titre de confirmation */}
                 <Text style={styles.heading}>Commande envoyée !</Text>
+                {/* Sous-titre avec des détails sur la commande */}
                 <Text style={styles.subtext}>Elle vous attendra à la fin de votre cours ! Régalez vous !</Text>
+                {/* Affichage du solde restant */}
                 <Text style={styles.balance}>Solde CROUS restant: {balance.toFixed(2)} €</Text>
             </View>
         </SafeAreaView>
@@ -57,14 +65,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingHorizontal: 15,
         marginTop: 30,
-    },
-    navbarImages: {
-        flexDirection: 'row',
-    },
-    navbarImage: {
-        width: 25,
-        height: 25,
-        marginRight: 10,
     },
     title: {
         fontSize: 24,

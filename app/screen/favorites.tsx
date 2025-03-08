@@ -1,31 +1,35 @@
-// app/favorites.js
 import React from 'react';
-import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useCart } from '../context/CartContext';
-import { useFavorites } from '../context/FavoritesContext';
+import { useCart } from '../../context/CartContext';
+import { useFavorites } from '../../context/FavoritesContext';
 import { Ionicons } from '@expo/vector-icons';
-
-import Panier from '../assets/images/paniers.png'; // Importez l'image locale
-import Compte from '../assets/images/utilisateur.png';
-import Favoris from '../assets/images/favori.png';
+import Panier from '../../assets/images/paniers.png';
+import Compte from '../../assets/images/utilisateur.png';
+import Favoris from '../../assets/images/favori.png';
 
 const FavoritesScreen = () => {
+    // Utilisation de useRouter pour la navigation.
     const router = useRouter();
+    // Récupération des articles du panier pour afficher le badge.
     const { cartItems } = useCart();
+    // Récupération des favoris et de la fonction pour les supprimer.
     const { favorites, removeFromFavorites } = useFavorites();
-    const totalItemsInCart = cartItems.reduce((total, item) => total + item.quantity, 0);
+    // Calcul du nombre total d'articles dans le panier.
+    const totalItemsInCart = cartItems.reduce((total: number, item: any) => total + item.quantity, 0);
 
-    const handleRemoveFromFavorites = (itemId) => {
+    // Fonction pour supprimer un article des favoris.
+    const handleRemoveFromFavorites = (itemId: number) => {
         removeFromFavorites(itemId);
     };
 
-    const renderFavoriteItem = ({ item }) => (
+    // Fonction pour rendre chaque élément de la liste des favoris.
+    const renderFavoriteItem = ({ item }: { item: { id: any, nom: string, description: string, prix: number, image: string, categorie: string, allergenes: string[], calories: number, origine: string } }) => (
         <TouchableOpacity
             style={styles.favoriteItem}
             onPress={() => router.push({
-                pathname: '/item-detail',
+                pathname: '/components/item-detail',
                 params: {
                     id: item.id,
                     nom: item.nom,
@@ -56,19 +60,19 @@ const FavoritesScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeContainer}>
-            {/* Navbar */}
+            {/* Barre de navigation */}
             <View style={styles.navbar}>
-                <TouchableOpacity onPress={() => router.push('/MainScreen')}>
+                <TouchableOpacity onPress={() => router.push('/screen/MainScreen')}>
                     <Text style={styles.title}>DeliveCrous</Text>
                 </TouchableOpacity>
                 <View style={styles.navbarImages}>
-                    <TouchableOpacity onPress={() => router.push('/favorites')}>
+                    <TouchableOpacity onPress={() => router.push('/screen/favorites')}>
                         <Image source={Favoris} style={[styles.navbarImage, { tintColor: '#2ecc71' }]} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => router.push('/user')}>
+                    <TouchableOpacity onPress={() => router.push('/screen/user')}>
                         <Image source={Compte} style={styles.navbarImage} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => router.replace('/cart')}>
+                    <TouchableOpacity onPress={() => router.replace('/screen/cart')}>
                         <View style={styles.cartIconContainer}>
                             <Image source={Panier} style={styles.navbarImage} />
                             {totalItemsInCart > 0 && (
@@ -81,17 +85,20 @@ const FavoritesScreen = () => {
                 </View>
             </View>
 
+            {/* Bouton de retour */}
             <TouchableOpacity
                 style={styles.backButton}
-                onPress={() => router.back()}
+                onPress={() => router.push('/screen/MainScreen')}
             >
                 <Ionicons name="arrow-back" size={24} color="black" />
             </TouchableOpacity>
+
+            {/* Titre de la page */}
             <View style={styles.headerContainer}>
                 <Text style={styles.headerTitle}>Mes Favoris</Text>
             </View>
 
-
+            {/* Affichage de la liste des favoris ou message si aucun favori */}
             {favorites.length > 0 ? (
                 <FlatList
                     data={favorites}

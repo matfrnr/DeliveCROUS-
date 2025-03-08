@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-
-// Assurez-vous d'importer les écrans correctement
-import MainScreen from '../MainScreen';
-import LoginScreen from '../LoginScreen';
+import MainScreen from '../screen/MainScreen';
+import LoginScreen from '../screen/LoginScreen';
 
 export default function HomeScreen() {
-  const [isLoggedIn, setIsLoggedIn] = useState(null);
-  const [loading, setLoading] = useState(true); // Ajout d'un état de chargement
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,11 +30,11 @@ export default function HomeScreen() {
       }
     };
     checkSession();
-  }, [router]); // Ajoutez router aux dépendances
+  }, [router]);
 
   if (loading) {
     // Affichez un indicateur de chargement pendant la vérification de la session
-    return null; // ou un composant de chargement
+    return null;
   }
 
   if (isLoggedIn) {

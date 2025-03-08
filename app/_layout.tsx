@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { CartProvider } from '@/context/CartContext';
 import { FavoritesProvider } from '@/context/FavoritesContext';
-import { OrderProvider } from '@/context/OrderContext'; // Importer le contexte de commande
+import { OrderProvider } from '@/context/OrderContext';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 // Empêcher l'écran de splash de se cacher automatiquement avant que le chargement des ressources soit terminé.
@@ -37,14 +37,13 @@ export default function RootLayout() {
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
-              <Stack.Screen name="MainScreen" options={{ headerShown: false }} />
-              <Stack.Screen name="item-detail" options={{ headerShown: false }} />
-              <Stack.Screen name="cart" options={{ headerShown: false }} />
-              <Stack.Screen name="success-screen" options={{ headerShown: false }} />
-              <Stack.Screen name="favorites" options={{ headerShown: false }} />
-              <Stack.Screen name="user" options={{ headerShown: false }} />
-              <Stack.Screen name="LoginScreen" options={{ headerShown: false }} />
-
+              <Stack.Screen name="screen/MainScreen" options={{ headerShown: false }} />
+              <Stack.Screen name="components/item-detail" options={{ headerShown: false }} />
+              <Stack.Screen name="screen/cart" options={{ headerShown: false }} />
+              <Stack.Screen name="components/success-screen" options={{ headerShown: false }} />
+              <Stack.Screen name="screen/favorites" options={{ headerShown: false }} />
+              <Stack.Screen name="screen/user" options={{ headerShown: false }} />
+              <Stack.Screen name="screen/LoginScreen" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="auto" />
           </ThemeProvider>

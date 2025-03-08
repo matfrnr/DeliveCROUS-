@@ -12,26 +12,29 @@ import {
     Image
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { login } from '../services/api';
+import { login } from '../../services/api';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import Panier from '../assets/images/paniers.png';
+import Panier from '../../assets/images/paniers.png';
 
 function LoginScreen() {
+    // États pour gérer les entrées utilisateur, le chargement, et l'affichage du mot de passe
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
 
+    // Fonction pour valider le formulaire avant la soumission
     const validateForm = () => {
+        // Vérifie si les champs email et mot de passe sont remplis
         if (!email.trim() || !password.trim()) {
             Alert.alert('Erreur', 'Veuillez remplir tous les champs');
             return false;
         }
 
-        // Basic email validation
+        // Validation basique de l'adresse email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             Alert.alert('Erreur', 'Veuillez entrer une adresse email valide');
@@ -41,26 +44,32 @@ function LoginScreen() {
         return true;
     };
 
+    // Fonction pour gérer la logique de connexion
     const handleLogin = async () => {
+        // Validation du formulaire avant de procéder
         if (!validateForm()) return;
 
+        // Indique que le chargement est en cours
         setIsLoading(true);
         try {
+            // Appel de l'API de connexion avec l'email et le mot de passe
             const response = await login(email, password);
 
-            // Stockez le token et l'utilisateur dans AsyncStorage
+            // Stockage du token et des informations utilisateur dans AsyncStorage
             await AsyncStorage.setItem('userToken', response.token);
             await AsyncStorage.setItem('user', JSON.stringify(response.user));
 
-            // Redirigez l'utilisateur vers l'écran principal
-            router.replace('/MainScreen');
+            // Redirection vers l'écran principal après une connexion réussie
+            router.replace('/screen/MainScreen');
 
         } catch (error) {
+            // Gestion des erreurs de connexion
             Alert.alert(
                 'Échec de connexion',
                 'Identifiants invalides. Veuillez réessayer.'
             );
         } finally {
+            // Indique que le chargement est terminé
             setIsLoading(false);
         }
     };
