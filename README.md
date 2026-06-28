@@ -1,50 +1,82 @@
-# Welcome to your Expo app 👋
+# DeliveCROUS
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Une application de livraison de repas pour les étudiants ! Avec la possibilité de consulter les plats, de les ajouter en ❤️ et de suivre la commande.
 
-## Get started
+## Présentation
 
-1. Install dependencies
+DeliveCROUS est une app React Native / Expo construite avec `expo-router`. Elle propose :
 
-   ```bash
-   npm install
-   ```
+- un écran principal de sélection de produits
+- une gestion de panier
+- un système de favoris
+- une navigation par onglets
+- des écrans de login et de confirmation de commande
 
-2. Start the app
+## Prérequis
 
-   ```bash
-    npx expo start
-   ```
+- Node.js 18+ recommandé
+- npm
+- Expo CLI ou `npx expo`
+- Android Studio / iOS Simulator pour l’émulation native (facultatif)
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Installation
 
 ```bash
-npm run reset-project
+ npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Lancer l’application
 
-## Learn more
+```bash
+npm start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Puis choisissez :
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Android avec `a`
+- iOS avec `i`
+- Web avec `w`
+- Expo Go pour un smartphone physique
 
-## Join the community
+## Scripts disponibles
 
-Join our community of developers creating universal apps.
+- `npm start` : lance Metro et Expo Router
+- `npm run android` : démarre l’app sur un appareil Android ou un émulateur
+- `npm run ios` : démarre l’app sur un simulateur iOS
+- `npm run web` : lance l’app dans le navigateur
+- `npm test` : exécute Jest en mode watch
+- `npm run lint` : vérifie le code avec Expo lint
+- `npm run reset-project` : réinitialise le projet via `scripts/reset-project.js`
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Structure du projet
+
+- `app/` : pages et navigation de l’application
+  - `screen/`: écrans principaux (`cart.tsx`, `favorites.tsx`, `LoginScreen.tsx`, `MainScreen.tsx`, `user.tsx`)
+  - `(tabs)/` : navigation par onglets
+  - `components/` : composants de l’interface (`item-detail.tsx`, `ItemCard.tsx`, `success-screen.tsx`)
+- `components/` : éléments UI réutilisables (`ThemedText.tsx`, `ThemedView.tsx`)
+- `context/` : context React pour le panier, les favoris, la commande et le timer
+- `constants/` : constantes, notamment les couleurs
+- `data/` : données de démonstration (`mockData.json`)
+- `hooks/` : hooks personnalisés
+- `services/` : appels API ou services partagés
+- `assets/` : polices et images
+
+## Tests
+
+Le projet utilise Jest et React Native Testing Library. Pour lancer les tests :
+
+```bash
+npm test
+```
+
+## Notes
+
+- La navigation est gérée par `expo-router`.
+- Le projet est configuré pour fonctionner sur mobile et web via Expo.
+
+## Ressources utiles
+
+- Expo Router : https://docs.expo.dev/router/introduction/
+- Expo : https://expo.dev/
+- React Native : https://reactnative.dev/
